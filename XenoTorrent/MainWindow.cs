@@ -89,7 +89,7 @@ public partial class MainWindow : Gtk.Window
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
 		Build ();
-		//djn
+		
 		EngineSettings es = new EngineSettings ();
 		es.PreferEncryption = false;
 		es.AllowedEncryption = EncryptionTypes.All;
