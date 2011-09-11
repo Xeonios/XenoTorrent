@@ -20,8 +20,9 @@ public partial class MainWindow : Gtk.Window
  	{
         string song_title;
 
-        public TorrentInfoRow (string Tname,string State, string Status, string Ds, string Us, string sc)
+        public TorrentInfoRow (string Tname,string State, string Status, string Ds, string Us, string sc, Torrent torrent)
         {
+        		this.torrent = torrent;
         		this.Tname = Tname;
                 this.State=State;
                 this.Status = Status;
@@ -31,6 +32,8 @@ public partial class MainWindow : Gtk.Window
                 SeedCount = sc;
         }
 
+		public Torrent torrent;
+		
         [Gtk.TreeNodeValue (Column = 0)]
         public string State;
 
@@ -107,7 +110,6 @@ public partial class MainWindow : Gtk.Window
 		
 		
 		nodeview2.NodeStore = new NodeStore (typeof(TorrentInfoRow));
-		
 		nodeview2.AppendColumn ("Status", new Gtk.CellRendererText (), "text", 0);
 		nodeview2.AppendColumn ("Progress", g, "value", 4);
 		nodeview2.AppendColumn ("Ds" + "(КБ/с)", new Gtk.CellRendererText (), "text", 2);
@@ -127,24 +129,23 @@ public partial class MainWindow : Gtk.Window
 				}
 			}
 		}
-
+		
+		// Working only with Gtk.Window object! (except [GLib.ConnectBeforeAttribute] attribute is defined on callback method)
+		nodeview2.ButtonPressEvent += HandleNodeview2ButtonPressEvent; 
+		
 		nodeview2.ShowAll ();
 		
 		engine.StartAll ();
-		//engine.StartAll ();
-		/*int now = Environment.TickCount;
-		while (true)
-			if (Environment.TickCount - now > 1000)
-			{
-				updateState (engine);
-				
-				now = Environment.TickCount;
-				Application.EventsPending ();
-			}*/
-		//Thread T = new Thread(st);	
-		//T.Priority = ThreadPriority.BelowNormal;
-		//T.Start();	
-		//Timer t = new Timer (updateState, this, 0, 1000);
+	}
+	
+	[GLib.ConnectBeforeAttribute]  // without it, the event doesn't invoked
+	void HandleNodeview2ButtonPressEvent (object o, ButtonPressEventArgs args)
+	{
+		if ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode != null)
+		{
+			XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent);
+			ts.Show ();
+		}
 	}
 
 	void UpdateAll (object sender, StatsUpdateEventArgs e)
@@ -152,16 +153,11 @@ public partial class MainWindow : Gtk.Window
 		Application.Invoke(updateState);
 	}
 	
-	public void st(object s)
-	{
-
-	}
 	
 	void LoadTorrent (string path)
 	{
 		// Load a .torrent file into memory
 		Torrent torrent = Torrent.Load (path);
-		
 		// Set all the files to not download
 		//foreach (TorrentFile file in torrent.Files)
 		//	file.Priority = Priority.DoNotDownload;
@@ -181,25 +177,16 @@ public partial class MainWindow : Gtk.Window
 		picker = new PriorityPicker (picker);
 		manager.ChangePicker (picker);
 		
-		nodeview2.NodeStore.AddNode (new TorrentInfoRow (manager.Torrent.Name, manager.State.ToString (), manager.Torrent.Name.Substring (0, 10), "-0", "0", "-0"));
+		nodeview2.NodeStore.AddNode (new TorrentInfoRow (manager.Torrent.Name, manager.State.ToString (), manager.Torrent.Name.Substring (0, 10), "-0", "0", "-0", torrent));
 		nodeview2.Columns[0].MinWidth=100;
 		nodeview2.Columns[1].MinWidth = 80;
 		nodeview2.Columns[2].MinWidth = 65;
 		nodeview2.Columns[3].MinWidth = 65;
 		nodeview2.Columns[4].MinWidth = 50;
-		nodeview2.NodeSelection.Changed += new System.EventHandler (OnSelectionChanged);
 		
-		/*manager.TorrentStateChanged += HandleManagerTorrentStateChanged;
-		manager.PieceManager.BlockReceived += delegate(object sender, BlockEventArgs e) {
-			
-		};
-		manager.PieceManager.BlockRequested += delegate(object sender, BlockEventArgs e) {
-			
-		};
-		manager.PeersFound += delegate(object sender, PeersAddedEventArgs e) {
-			
-		};*/
+		nodeview2.NodeSelection.Changed += new System.EventHandler (OnSelectionChanged);
 	}
+
 
 	void HandleManagerTorrentStateChanged (object sender, TorrentStateChangedEventArgs e)
 	{
@@ -208,7 +195,6 @@ public partial class MainWindow : Gtk.Window
 	
 	void OnSelectionChanged (object o, System.EventArgs args)
 	{
-
 		Gtk.NodeSelection selection = (Gtk.NodeSelection)o;
 		
 		if ((TorrentInfoRow)selection.SelectedNode != null)
