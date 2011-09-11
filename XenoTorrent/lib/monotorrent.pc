@@ -1,0 +1,7 @@
+Name: MonoTorrent
+Description: MonoTorrent
+Version: 0.80
+
+Requires: 
+Libraries=/usr/local/lib/monotorrent/MonoTorrent.dll
+Libs: -r:MonoTorrent.dll
