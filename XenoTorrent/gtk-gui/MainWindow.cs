@@ -59,6 +59,5 @@ public partial class MainWindow
 		this.DefaultHeight = 238;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
-		this.nodeview2.ButtonPressEvent += new global::Gtk.ButtonPressEventHandler (this.NodeView2ButtonPress);
 	}
 }

@@ -65,6 +65,8 @@ public partial class MainWindow : Gtk.Window
 		
 		protected override void Render (Gdk.Drawable window, Widget widget, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, Gdk.Rectangle expose_area, CellRendererState flags)
 		{
+			// Don't call base Render method of CellRendererProgress (it's looking badly on Windows)
+			
 			Gdk.GC gc = new Gdk.GC(window);
 			
 			gc.RgbFgColor = new Gdk.Color(0,0,0);
@@ -77,14 +79,10 @@ public partial class MainWindow : Gtk.Window
 			window.DrawRectangle(gc,true,cell_area.X+2,cell_area.Y+2,(cell_area.Width-4)*Value/100, cell_area.Height-4);
 			
 			Pango.Layout layout = new Pango.Layout (widget.PangoContext);
-			
 			gc.RgbFgColor = new Gdk.Color(0,0,0);
-
             layout.Wrap = Pango.WrapMode.Word;
             layout.FontDescription = FontDescription.FromString ("Arial 8");
             layout.SetText(Value.ToString()+"%"); 
-			//ZXc
-		
 			window.DrawLayout (gc, expose_area.X + expose_area.Width/2 - (layout.Text.Length*6/2),cell_area.Y+(int)((float)cell_area.Height/2) -6, layout);
 		}
 	}
@@ -104,10 +102,7 @@ public partial class MainWindow : Gtk.Window
 		
 		CellRendererProgressBar g= new CellRendererProgressBar();
 		
-
-		
 		engine.StatsUpdate += UpdateAll;
-		
 		
 		nodeview2.NodeStore = new NodeStore (typeof(TorrentInfoRow));
 		nodeview2.AppendColumn ("Status", new Gtk.CellRendererText (), "text", 0);
@@ -115,6 +110,7 @@ public partial class MainWindow : Gtk.Window
 		nodeview2.AppendColumn ("Ds" + "(КБ/с)", new Gtk.CellRendererText (), "text", 2);
 		nodeview2.AppendColumn ("Us" + "(КБ/с)", new Gtk.CellRendererText (), "text", 3);
 		nodeview2.AppendColumn ("Seeds", new Gtk.CellRendererText (), "text", 5);
+		
 		foreach (string file in Directory.GetFiles ("torrents"))
 		{
 			if (file.EndsWith (".torrent"))
@@ -138,7 +134,7 @@ public partial class MainWindow : Gtk.Window
 		engine.StartAll ();
 	}
 	
-	[GLib.ConnectBeforeAttribute]  // without it, the event doesn't invoked
+	[GLib.ConnectBeforeAttribute]  // without it, the ButtonPress event of nodeview2 doesn't invoked
 	void HandleNodeview2ButtonPressEvent (object o, ButtonPressEventArgs args)
 	{
 		if ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode != null)
@@ -183,7 +179,6 @@ public partial class MainWindow : Gtk.Window
 		nodeview2.Columns[2].MinWidth = 65;
 		nodeview2.Columns[3].MinWidth = 65;
 		nodeview2.Columns[4].MinWidth = 50;
-		
 		nodeview2.NodeSelection.Changed += new System.EventHandler (OnSelectionChanged);
 	}
 

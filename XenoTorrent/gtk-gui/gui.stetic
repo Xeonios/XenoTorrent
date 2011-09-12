@@ -123,6 +123,7 @@
             <property name="Type">StockItem</property>
             <property name="StockId">gtk-cancel</property>
             <property name="ResponseId">-6</property>
+            <signal name="ButtonPressEvent" handler="OnButtonCancelPress" />
             <property name="label">gtk-cancel</property>
           </widget>
           <packing>
@@ -139,6 +140,7 @@
             <property name="Type">StockItem</property>
             <property name="StockId">gtk-ok</property>
             <property name="ResponseId">-5</property>
+            <signal name="ButtonPressEvent" handler="OnButtonOkPress" />
             <property name="label">gtk-ok</property>
           </widget>
           <packing>

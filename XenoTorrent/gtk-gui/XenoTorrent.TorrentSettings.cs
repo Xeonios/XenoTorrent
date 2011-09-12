@@ -94,6 +94,8 @@ namespace XenoTorrent
 			this.DefaultWidth = 400;
 			this.DefaultHeight = 473;
 			this.Show ();
+			this.buttonCancel.ButtonPressEvent += new global::Gtk.ButtonPressEventHandler (this.OnButtonCancelPress);
+			this.buttonOk.ButtonPressEvent += new global::Gtk.ButtonPressEventHandler (this.OnButtonOkPress);
 		}
 	}
 }
