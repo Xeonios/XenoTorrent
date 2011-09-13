@@ -8,15 +8,14 @@ namespace XenoTorrent
 	public partial class TorrentSettings : Gtk.Dialog
 	{
 		Torrent torrent;
-		Gtk.TreeStore tfileListStore;
-		
-
+		//TODO Добавить столбец с процентом закаченности
+		//TODO Добавить столбец с общим обьемом файла
+		//TODO Автоматическое принятие изменений в столбце Priority при нажатии кнопки "ok" 
 		public TorrentSettings (Torrent t)
 		{
 			this.Build ();
 			
 			torrent = t;
-			
 			label1.Text = t.Name;
 			CellRendererText crte = new CellRendererText();
 			
@@ -42,7 +41,7 @@ namespace XenoTorrent
 			crc.Model = m;
 			crc.TextColumn = 0;
 			crc.Editable = true;
-			//crc.Text = cbe[1];
+			
 			crc.Edited += HandleCrcEdited;
 			
 			treeview1.AppendColumn ("Path", new CellRendererText(), "text", 0);
@@ -55,7 +54,7 @@ namespace XenoTorrent
 			treeview1.AppendColumn ("IsDownload", crt, "active", 1);
 			treeview1.AppendColumn("Priority", crc, "text", 2);
 
-			tfileListStore = new Gtk.TreeStore (typeof(string), typeof(bool), typeof(string));
+			Gtk.TreeStore tfileListStore = new Gtk.TreeStore (typeof(string), typeof(bool), typeof(string));
 			
 			foreach (TorrentFile file in t.Files)
 			{
@@ -162,7 +161,7 @@ namespace XenoTorrent
 						}
 
 					}
-				tfileListStore.IterNext(ref it);
+				treeview1.Model.IterNext(ref it);
 			}
 			this.Destroy ();
 		}

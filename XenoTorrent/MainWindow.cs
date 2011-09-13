@@ -12,6 +12,10 @@ using System.Threading;
 
 public partial class MainWindow : Gtk.Window
 {
+	//TODO разделение новых торрентов и старых закачек 
+	//TODO Открытие диалога с параметрами торрента до начала скачивания нового торрента
+	//TODO Хранение параметров старых закачек на харде
+	//TODO добавить возможность работы с торрентами на распределенных хеш таблицах
 	ClientEngine engine;
 	List<TorrentManager> managers = new List<TorrentManager> ();
 	
