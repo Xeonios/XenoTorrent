@@ -4,13 +4,10 @@
 public partial class MainWindow
 {
 	private global::Gtk.VBox vbox1;
-
 	private global::Gtk.ScrolledWindow GtkScrolledWindow;
-
 	private global::Gtk.NodeView nodeview2;
-
 	private global::Gtk.Statusbar statusbar1;
-
+    
 	protected virtual void Build ()
 	{
 		global::Stetic.Gui.Initialize (this);
@@ -39,14 +36,14 @@ public partial class MainWindow
 		this.nodeview2.HoverSelection = true;
 		this.GtkScrolledWindow.Add (this.nodeview2);
 		this.vbox1.Add (this.GtkScrolledWindow);
-		global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.GtkScrolledWindow]));
+		global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.GtkScrolledWindow]));
 		w2.Position = 0;
 		// Container child vbox1.Gtk.Box+BoxChild
 		this.statusbar1 = new global::Gtk.Statusbar ();
 		this.statusbar1.Name = "statusbar1";
 		this.statusbar1.Spacing = 6;
 		this.vbox1.Add (this.statusbar1);
-		global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1[this.statusbar1]));
+		global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.statusbar1]));
 		w3.Position = 1;
 		w3.Expand = false;
 		w3.Fill = false;

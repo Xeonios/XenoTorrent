@@ -24,19 +24,21 @@ public partial class MainWindow : Gtk.Window
  	{
         string song_title;
 
-        public TorrentInfoRow (string Tname,string State, string Status, string Ds, string Us, string sc, Torrent torrent)
+        public TorrentInfoRow (string Tname,string State, string Status, string Ds, string Us, string sc, Torrent torrent, int index)
         {
-        		this.torrent = torrent;
-        		this.Tname = Tname;
-                this.State=State;
-                this.Status = Status;
-                this.Ds = Ds;
-                this.Us = Us;
-                this.song_title = song_title;
-                SeedCount = sc;
+    		Index = index;
+    		this.torrent = torrent;
+    		this.Tname = Tname;
+            this.State=State;
+            this.Status = Status;
+            this.Ds = Ds;
+            this.Us = Us;
+            this.song_title = song_title;
+            SeedCount = sc;
         }
 
 		public Torrent torrent;
+		public int Index;
 		
         [Gtk.TreeNodeValue (Column = 0)]
         public string State;
@@ -143,9 +145,39 @@ public partial class MainWindow : Gtk.Window
 	{
 		if ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode != null)
 		{
-			XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent);
-			ts.Show ();
+			if ((args.Event.Button==1))
+			{
+					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent);
+					ts.Show ();
+			}
+			
+			if (args.Event.Button==3)
+			{
+				Gtk.Menu jBox = new Gtk.Menu ();
+				Gtk.MenuItem MenuItem1 = new MenuItem ("Запустить");
+				MenuItem1.ButtonReleaseEvent += HandleMenuItem1ButtonReleaseEvent;
+				jBox.Add (MenuItem1);        
+				Gtk.MenuItem MenuItem2 = new MenuItem ("Остановить");
+				MenuItem2.ButtonReleaseEvent += HandleMenuItem2ButtonReleaseEvent;
+				jBox.Add (MenuItem2);
+				Gtk.MenuItem MenuItem3 = new MenuItem ("Открыть");
+				//MenuItem2.ButtonReleaseEvent += HandleMenuItem2ButtonReleaseEvent;
+				jBox.Add (MenuItem3);
+          
+				jBox.ShowAll ();
+				jBox.Popup ();
+			}
 		}
+	}
+
+	void HandleMenuItem2ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
+	{
+		managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Stop ();
+	}
+
+	void HandleMenuItem1ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
+	{
+		managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Start ();
 	}
 
 	void UpdateAll (object sender, StatsUpdateEventArgs e)
@@ -177,7 +209,7 @@ public partial class MainWindow : Gtk.Window
 		picker = new PriorityPicker (picker);
 		manager.ChangePicker (picker);
 		
-		nodeview2.NodeStore.AddNode (new TorrentInfoRow (manager.Torrent.Name, manager.State.ToString (), manager.Torrent.Name.Substring (0, 10), "-0", "0", "-0", torrent));
+		nodeview2.NodeStore.AddNode (new TorrentInfoRow (manager.Torrent.Name, manager.State.ToString (), manager.Torrent.Name.Substring (0, 10), "-0", "0", "-0", torrent, managers.Count -1));
 		nodeview2.Columns[0].MinWidth=100;
 		nodeview2.Columns[1].MinWidth = 80;
 		nodeview2.Columns[2].MinWidth = 65;

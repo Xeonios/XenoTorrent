@@ -41,7 +41,7 @@ namespace XenoTorrent
 			crc.Model = m;
 			crc.TextColumn = 0;
 			crc.Editable = true;
-			
+
 			crc.Edited += HandleCrcEdited;
 			
 			treeview1.AppendColumn ("Path", new CellRendererText(), "text", 0);
