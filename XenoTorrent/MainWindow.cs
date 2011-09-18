@@ -1,13 +1,16 @@
 
 using System;
 using System.IO;
+using System.Net;
 using System.Collections.Generic;
 using Gtk;
 using Pango;
+using MonoTorrent;
 using MonoTorrent.Client;
 using MonoTorrent.Common;
+using MonoTorrent.BEncoding;
+using MonoTorrent.Tracker;
 using MonoTorrent.Client.Encryption;
-using MonoTorrent.Client.Tracker;
 using System.Threading;
 
 public partial class MainWindow : Gtk.Window
@@ -18,7 +21,9 @@ public partial class MainWindow : Gtk.Window
 	//TODO добавить возможность работы с торрентами на распределенных хеш таблицах
 	ClientEngine engine;
 	List<TorrentManager> managers = new List<TorrentManager> ();
-	
+	Gtk.Menu jBox;
+	Gtk.MenuItem MenuItem3;
+	string fastResumePath = "FastResume.Data";
 	[TreeNode (ListOnly=true)]
  	public class TorrentInfoRow : Gtk.TreeNode 
  	{
@@ -117,6 +122,20 @@ public partial class MainWindow : Gtk.Window
 		nodeview2.AppendColumn ("Us" + "(КБ/с)", new Gtk.CellRendererText (), "text", 3);
 		nodeview2.AppendColumn ("Seeds", new Gtk.CellRendererText (), "text", 5);
 		
+		jBox = new Gtk.Menu ();
+		Gtk.MenuItem MenuItem1 = new MenuItem ("Запустить");
+		MenuItem1.ButtonReleaseEvent += HandleMenuItem1ButtonReleaseEvent;
+		jBox.Add (MenuItem1);        
+		Gtk.MenuItem MenuItem4 = new MenuItem ("Пауза");
+		MenuItem4.ButtonReleaseEvent += HandleMenuItem4ButtonReleaseEvent;
+		Gtk.MenuItem MenuItem2 = new MenuItem ("Остановить");
+		MenuItem2.ButtonReleaseEvent += HandleMenuItem2ButtonReleaseEvent;
+		jBox.Add (MenuItem2);
+		MenuItem3 = new MenuItem ("Открыть Файл");
+		MenuItem3.Sensitive = false;
+		MenuItem3.ButtonReleaseEvent += HandleMenuItem3ButtonReleaseEvent;
+		jBox.Add (MenuItem3);
+		
 		foreach (string file in Directory.GetFiles ("torrents"))
 		{
 			if (file.EndsWith (".torrent"))
@@ -131,7 +150,8 @@ public partial class MainWindow : Gtk.Window
 				}
 			}
 		}
-		
+		//engine.StopAll();
+		LoadFastResume(managers);
 		// Working only with Gtk.Window object! (except [GLib.ConnectBeforeAttribute] attribute is defined on callback method)
 		nodeview2.ButtonPressEvent += HandleNodeview2ButtonPressEvent; 
 		
@@ -153,21 +173,25 @@ public partial class MainWindow : Gtk.Window
 			
 			if (args.Event.Button==3)
 			{
-				Gtk.Menu jBox = new Gtk.Menu ();
-				Gtk.MenuItem MenuItem1 = new MenuItem ("Запустить");
-				MenuItem1.ButtonReleaseEvent += HandleMenuItem1ButtonReleaseEvent;
-				jBox.Add (MenuItem1);        
-				Gtk.MenuItem MenuItem2 = new MenuItem ("Остановить");
-				MenuItem2.ButtonReleaseEvent += HandleMenuItem2ButtonReleaseEvent;
-				jBox.Add (MenuItem2);
-				Gtk.MenuItem MenuItem3 = new MenuItem ("Открыть");
-				//MenuItem2.ButtonReleaseEvent += HandleMenuItem2ButtonReleaseEvent;
-				jBox.Add (MenuItem3);
-          
+				if (managers[((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].State == TorrentState.Seeding)
+					MenuItem3.Sensitive = true;
+				else
+					MenuItem3.Sensitive = false;
 				jBox.ShowAll ();
 				jBox.Popup ();
 			}
 		}
+	}
+
+	void HandleMenuItem4ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
+	{
+		managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Pause ();
+	}
+	
+	void HandleMenuItem3ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
+	{
+		System.Diagnostics.Process.Start("Downloads/"+ ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent.Name);
+		
 	}
 
 	void HandleMenuItem2ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
@@ -191,17 +215,17 @@ public partial class MainWindow : Gtk.Window
 		// Load a .torrent file into memory
 		Torrent torrent = Torrent.Load (path);
 		// Set all the files to not download
-		//foreach (TorrentFile file in torrent.Files)
-		//	file.Priority = Priority.DoNotDownload;
+	//	foreach (TorrentFile file in torrent.Files)
+	//		file.Priority = Priority.DoNotDownload;
 		
 		// Set the first file as high priority and the second one as normal
-		torrent.Files[0].Priority = Priority.Highest;
+		//torrent.Files[0].Priority = Priority.Highest;
 		//torrent.Files[1].Priority = Priority.Normal;
 		
 		TorrentManager manager = new TorrentManager (torrent, "Downloads", new TorrentSettings ());
-		
+		//manager.HashCheck (false);
 		managers.Add (manager);
-	
+		
 		engine.Register(manager);
 		
 		// Disable rarest first and randomised picking - only allow priority based picking (i.e. selective downloading)
@@ -219,10 +243,7 @@ public partial class MainWindow : Gtk.Window
 	}
 
 
-	void HandleManagerTorrentStateChanged (object sender, TorrentStateChangedEventArgs e)
-	{
-		Application.Invoke(updateState);
-	}
+
 	
 	void OnSelectionChanged (object o, System.EventArgs args)
 	{
@@ -238,6 +259,7 @@ public partial class MainWindow : Gtk.Window
 	
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
 	{
+		SaveFastResume (managers);
 		engine.StopAll ();
 		Application.Quit ();
 		a.RetVal = true;
@@ -261,5 +283,54 @@ public partial class MainWindow : Gtk.Window
 		nodeview2.QueueDraw();
 	}
 	
+     public void SaveFastResume (List <TorrentManager> managers)
+     {
+         // Store the fast resume for each torrent in a list,
+         // then serialise the list to the disk.
+         BEncodedList list = new BEncodedList ();
+         foreach (TorrentManager manager in managers) {
+
+             // Get the fast resume data for the torrent
+             FastResume data = manager.SaveFastResume ();
+
+             // Encode the FastResume data to a BEncodedDictionary.
+             BEncodedDictionary fastResume = data.Encode ();
+             // Add the FastResume dictionary to the main dictionary using
+             // the torrents infohash as the key
+             list.Add((fastResume as BEncodedValue));
+             
+         }
+
+         // Write all the fast resume data to disk
+         File.WriteAllBytes (fastResumePath, list.Encode ());
+     }
+
+	public void LoadFastResume (List <TorrentManager> managers)
+	{
+		// Read the main dictionary from disk and iterate through
+		// all the fast resume items
+		if (File.Exists(fastResumePath))
+		{
+			BEncodedList list = (BEncodedList) BEncodedValue.Decode (File.ReadAllBytes (fastResumePath));
+			foreach (BEncodedDictionary fastResume in list) 
+			{
+				// Decode the FastResume data from the BEncodedDictionary
+				FastResume data = new FastResume (fastResume);
+				
+				// Find the torrentmanager that the fastresume belongs to
+				// and then load it
+				foreach (TorrentManager manager in managers) 
+					if (manager.InfoHash == data.Infohash)
+						manager.LoadFastResume (data);
+			}
+			foreach (TorrentManager manager in managers) 
+				if (!manager.HashChecked)
+				{
+					manager.HashCheck(true);
+					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (manager.Torrent);
+					ts.Show ();
+				}
+		}
+	}
 }
 

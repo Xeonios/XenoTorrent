@@ -16,7 +16,7 @@ namespace XenoTorrent
 			this.Build ();
 			
 			torrent = t;
-			label1.Text = t.Name;
+			Title = t.Name;
 			CellRendererText crte = new CellRendererText();
 			
 			

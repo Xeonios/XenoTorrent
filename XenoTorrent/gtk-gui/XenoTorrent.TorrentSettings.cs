@@ -5,9 +5,13 @@ namespace XenoTorrent
 	public partial class TorrentSettings
 	{
 		private global::Gtk.VBox vbox2;
-		private global::Gtk.Label label1;
+		private global::Gtk.Notebook notebook1;
 		private global::Gtk.ScrolledWindow GtkScrolledWindow;
 		private global::Gtk.TreeView treeview1;
+		private global::Gtk.Label label1;
+		private global::Gtk.ScrolledWindow GtkScrolledWindow1;
+		private global::Gtk.TextView textview1;
+		private global::Gtk.Label label2;
 		private global::Gtk.Button buttonCancel;
 		private global::Gtk.Button buttonOk;
         
@@ -27,16 +31,11 @@ namespace XenoTorrent
 			this.vbox2.Name = "vbox2";
 			this.vbox2.Spacing = 6;
 			// Container child vbox2.Gtk.Box+BoxChild
-			this.label1 = new global::Gtk.Label ();
-			this.label1.Name = "label1";
-			this.label1.Xalign = 0F;
-			this.label1.LabelProp = global::Mono.Unix.Catalog.GetString ("Имя:");
-			this.vbox2.Add (this.label1);
-			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.label1]));
-			w2.Position = 0;
-			w2.Expand = false;
-			w2.Fill = false;
-			// Container child vbox2.Gtk.Box+BoxChild
+			this.notebook1 = new global::Gtk.Notebook ();
+			this.notebook1.CanFocus = true;
+			this.notebook1.Name = "notebook1";
+			this.notebook1.CurrentPage = 0;
+			// Container child notebook1.Gtk.Notebook+NotebookChild
 			this.GtkScrolledWindow = new global::Gtk.ScrolledWindow ();
 			this.GtkScrolledWindow.Name = "GtkScrolledWindow";
 			this.GtkScrolledWindow.ShadowType = ((global::Gtk.ShadowType)(1));
@@ -45,18 +44,44 @@ namespace XenoTorrent
 			this.treeview1.CanFocus = true;
 			this.treeview1.Name = "treeview1";
 			this.GtkScrolledWindow.Add (this.treeview1);
-			this.vbox2.Add (this.GtkScrolledWindow);
-			global::Gtk.Box.BoxChild w4 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.GtkScrolledWindow]));
-			w4.Position = 1;
+			this.notebook1.Add (this.GtkScrolledWindow);
+			// Notebook tab
+			this.label1 = new global::Gtk.Label ();
+			this.label1.Name = "label1";
+			this.label1.LabelProp = global::Mono.Unix.Catalog.GetString ("Файлы");
+			this.notebook1.SetTabLabel (this.GtkScrolledWindow, this.label1);
+			this.label1.ShowAll ();
+			// Container child notebook1.Gtk.Notebook+NotebookChild
+			this.GtkScrolledWindow1 = new global::Gtk.ScrolledWindow ();
+			this.GtkScrolledWindow1.Name = "GtkScrolledWindow1";
+			this.GtkScrolledWindow1.ShadowType = ((global::Gtk.ShadowType)(1));
+			// Container child GtkScrolledWindow1.Gtk.Container+ContainerChild
+			this.textview1 = new global::Gtk.TextView ();
+			this.textview1.CanFocus = true;
+			this.textview1.Name = "textview1";
+			this.textview1.Editable = false;
+			this.GtkScrolledWindow1.Add (this.textview1);
+			this.notebook1.Add (this.GtkScrolledWindow1);
+			global::Gtk.Notebook.NotebookChild w5 = ((global::Gtk.Notebook.NotebookChild)(this.notebook1 [this.GtkScrolledWindow1]));
+			w5.Position = 1;
+			// Notebook tab
+			this.label2 = new global::Gtk.Label ();
+			this.label2.Name = "label2";
+			this.label2.LabelProp = global::Mono.Unix.Catalog.GetString ("Статистика");
+			this.notebook1.SetTabLabel (this.GtkScrolledWindow1, this.label2);
+			this.label2.ShowAll ();
+			this.vbox2.Add (this.notebook1);
+			global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.vbox2 [this.notebook1]));
+			w6.Position = 0;
 			w1.Add (this.vbox2);
-			global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(w1 [this.vbox2]));
-			w5.Position = 0;
+			global::Gtk.Box.BoxChild w7 = ((global::Gtk.Box.BoxChild)(w1 [this.vbox2]));
+			w7.Position = 0;
 			// Internal child XenoTorrent.TorrentSettings.ActionArea
-			global::Gtk.HButtonBox w6 = this.ActionArea;
-			w6.Name = "dialog1_ActionArea";
-			w6.Spacing = 10;
-			w6.BorderWidth = ((uint)(5));
-			w6.LayoutStyle = ((global::Gtk.ButtonBoxStyle)(4));
+			global::Gtk.HButtonBox w8 = this.ActionArea;
+			w8.Name = "dialog1_ActionArea";
+			w8.Spacing = 10;
+			w8.BorderWidth = ((uint)(5));
+			w8.LayoutStyle = ((global::Gtk.ButtonBoxStyle)(4));
 			// Container child dialog1_ActionArea.Gtk.ButtonBox+ButtonBoxChild
 			this.buttonCancel = new global::Gtk.Button ();
 			this.buttonCancel.CanDefault = true;
@@ -66,9 +91,9 @@ namespace XenoTorrent
 			this.buttonCancel.UseUnderline = true;
 			this.buttonCancel.Label = "gtk-cancel";
 			this.AddActionWidget (this.buttonCancel, -6);
-			global::Gtk.ButtonBox.ButtonBoxChild w7 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w6 [this.buttonCancel]));
-			w7.Expand = false;
-			w7.Fill = false;
+			global::Gtk.ButtonBox.ButtonBoxChild w9 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w8 [this.buttonCancel]));
+			w9.Expand = false;
+			w9.Fill = false;
 			// Container child dialog1_ActionArea.Gtk.ButtonBox+ButtonBoxChild
 			this.buttonOk = new global::Gtk.Button ();
 			this.buttonOk.CanDefault = true;
@@ -78,10 +103,10 @@ namespace XenoTorrent
 			this.buttonOk.UseUnderline = true;
 			this.buttonOk.Label = "gtk-ok";
 			this.AddActionWidget (this.buttonOk, -5);
-			global::Gtk.ButtonBox.ButtonBoxChild w8 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w6 [this.buttonOk]));
-			w8.Position = 1;
-			w8.Expand = false;
-			w8.Fill = false;
+			global::Gtk.ButtonBox.ButtonBoxChild w10 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w8 [this.buttonOk]));
+			w10.Position = 1;
+			w10.Expand = false;
+			w10.Fill = false;
 			if ((this.Child != null))
 			{
 				this.Child.ShowAll ();
