@@ -111,11 +111,11 @@ namespace XenoTorrent
 			{
 				this.Child.ShowAll ();
 			}
-			this.DefaultWidth = 400;
+			this.DefaultWidth = 575;
 			this.DefaultHeight = 473;
 			this.Show ();
 			this.buttonCancel.ButtonPressEvent += new global::Gtk.ButtonPressEventHandler (this.OnButtonCancelPress);
-			this.buttonOk.ButtonPressEvent += new global::Gtk.ButtonPressEventHandler (this.OnButtonOkPress);
+			this.buttonOk.ButtonReleaseEvent += new global::Gtk.ButtonReleaseEventHandler (this.OnButtonOkPress);
 		}
 	}
 }

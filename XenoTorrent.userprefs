@@ -2,9 +2,10 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.Workbench ActiveDocument="XenoTorrent/MainWindow.cs">
     <Files>
-      <File FileName="XenoTorrent/Main.cs" Line="10" Column="4" />
-      <File FileName="XenoTorrent/MainWindow.cs" Line="172" Column="2" />
-      <File FileName="XenoTorrent/TorrentSettings.cs" Line="1" Column="1" />
+      <File FileName="XenoTorrent/Main.cs" Line="5" Column="22" />
+      <File FileName="XenoTorrent/MainWindow.cs" Line="156" Column="40" />
+      <File FileName="XenoTorrent/TorrentSettings.cs" Line="110" Column="79" />
+      <File FileName="../monotorrent/src/DhtSampleClient/Program.cs" Line="6" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -12,6 +13,7 @@
           <Node name="XenoTorrent" expanded="True">
             <Option id="ShowVersionControlOverlays" value="True" />
             <Option id="ShowAllFiles" value="False" />
+            <Node name="References" expanded="True" />
             <Node name="MainWindow.cs" selected="True" />
           </Node>
         </State>

@@ -11,7 +11,7 @@
     <property name="MemberName" />
     <property name="Events">ButtonPressMask, ButtonReleaseMask</property>
     <property name="ExtensionEvents">All</property>
-    <property name="Title" translatable="yes">Xeno Torrent</property>
+    <property name="Title" translatable="yes">Xeno Torrent 1</property>
     <property name="WindowPosition">CenterOnParent</property>
     <signal name="DeleteEvent" handler="OnDeleteEvent" />
     <child>
@@ -55,7 +55,7 @@
       </widget>
     </child>
   </widget>
-  <widget class="Gtk.Dialog" id="XenoTorrent.TorrentSettings" design-size="400 473">
+  <widget class="Gtk.Dialog" id="XenoTorrent.TorrentSettings" design-size="575 473">
     <property name="MemberName" />
     <property name="Title" translatable="yes">Свойства Торрента</property>
     <property name="WindowPosition">CenterOnParent</property>
@@ -170,7 +170,7 @@
             <property name="Type">StockItem</property>
             <property name="StockId">gtk-ok</property>
             <property name="ResponseId">-5</property>
-            <signal name="ButtonPressEvent" handler="OnButtonOkPress" />
+            <signal name="ButtonReleaseEvent" handler="OnButtonOkPress" />
             <property name="label">gtk-ok</property>
           </widget>
           <packing>

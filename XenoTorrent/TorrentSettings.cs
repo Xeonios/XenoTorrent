@@ -8,9 +8,8 @@ namespace XenoTorrent
 	public partial class TorrentSettings : Gtk.Dialog
 	{
 		Torrent torrent;
-		//TODO Добавить столбец с процентом закаченности
-		//TODO Добавить столбец с общим обьемом файла
 		//TODO Автоматическое принятие изменений в столбце Priority при нажатии кнопки "ok" 
+		//TODO Статистика торрента
 		public TorrentSettings (Torrent t)
 		{
 			this.Build ();
@@ -52,19 +51,21 @@ namespace XenoTorrent
 			treeview1.Columns[0].Resizable = true;
 
 			treeview1.AppendColumn ("IsDownload", crt, "active", 1);
-			treeview1.AppendColumn("Priority", crc, "text", 2);
-
-			Gtk.TreeStore tfileListStore = new Gtk.TreeStore (typeof(string), typeof(bool), typeof(string));
+			treeview1.AppendColumn ("Progress", new CellRendererProgressBar (), "value", 2);
+			treeview1.AppendColumn ("Size(MB)", new CellRendererText (), "text", 3);
+			treeview1.AppendColumn("Priority", crc, "text", 4);
 			
+			Gtk.TreeStore tfileListStore = new Gtk.TreeStore (typeof(string), typeof(bool), typeof(int), typeof(string),  typeof(string));
+
 			foreach (TorrentFile file in t.Files)
 			{
 				if (file.Priority != Priority.DoNotDownload)
 				{
-					tfileListStore.AppendValues (file.Path, true, file.Priority.ToString());
+					tfileListStore.AppendValues (file.Path, true, (int)(file.BytesDownloaded / file.Length) * 100, ((float)file.Length / 1024 / 1024).ToString ("0.00"),  file.Priority.ToString());
 				}
 				else
 				{
-					tfileListStore.AppendValues (file.Path, false, "Normal");	
+					tfileListStore.AppendValues (file.Path, false, (int)(file.BytesDownloaded / file.Length) * 100, ((float)file.Length / 1024 / 1024).ToString ("0.00"),  "Normal");	
 				}
 
 					
@@ -82,7 +83,7 @@ namespace XenoTorrent
 			TreeIter it = new TreeIter ();			
 
 			treeview1.Model.GetIterFromString (out it, args.Path);
-			treeview1.Model.SetValue (it, 2, args.NewText);
+			treeview1.Model.SetValue (it, 4, args.NewText);
 		}
 
 		
@@ -105,15 +106,15 @@ namespace XenoTorrent
 			this.Destroy();
 		}
 		
-		[GLib.ConnectBeforeAttribute]
-		protected virtual void OnButtonOkPress (object o, Gtk.ButtonPressEventArgs args)
+		//[GLib.ConnectBeforeAttribute]
+		protected virtual void OnButtonOkPress (object o, Gtk.ButtonReleaseEventArgs args)
 		{
 			TreeIter it = new TreeIter ();
 			treeview1.Model.GetIterFirst (out it);
 			foreach (TorrentFile file in torrent.Files)
 			{
 				bool crt = Convert.ToBoolean((treeview1.Model.GetValue (it, 1)));
-				string PrioritySetting = treeview1.Model.GetValue (it, 2).ToString();
+				string PrioritySetting = treeview1.Model.GetValue (it, 4).ToString();
 				
 				if (!crt)
 					file.Priority = Priority.DoNotDownload;

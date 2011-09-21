@@ -11,92 +11,90 @@ using MonoTorrent.Common;
 using MonoTorrent.BEncoding;
 using MonoTorrent.Tracker;
 using MonoTorrent.Client.Encryption;
+using MonoTorrent.Dht;
 using System.Threading;
+
+	class CellRendererProgressBar : CellRendererProgress
+	{
+		public CellRendererProgressBar () : base()
+		{
+				
+		}
+			
+		protected override void Render (Gdk.Drawable window, Widget widget, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, Gdk.Rectangle expose_area, CellRendererState flags)
+		{
+			// Don't call base Render method of CellRendererProgress (it's looking badly on Windows)
+				
+			Gdk.GC gc = new Gdk.GC (window);
+				
+			gc.RgbFgColor = new Gdk.Color (0, 0, 0);
+			window.DrawRectangle (gc, true, cell_area.X, cell_area.Y, cell_area.Width, cell_area.Height);
+				
+			gc.RgbFgColor = new Gdk.Color (255, 255, 255);
+			window.DrawRectangle (gc, true, cell_area.X + 1, cell_area.Y + 1, cell_area.Width - 2, cell_area.Height - 2);
+				
+			gc.RgbFgColor = new Gdk.Color (130, 0, 200);
+			window.DrawRectangle (gc, true, cell_area.X + 2, cell_area.Y + 2, (cell_area.Width - 4) * Value / 100, cell_area.Height - 4);
+				
+			Pango.Layout layout = new Pango.Layout (widget.PangoContext);
+			gc.RgbFgColor = new Gdk.Color (0, 0, 0);
+			layout.Wrap = Pango.WrapMode.Word;
+			layout.FontDescription = FontDescription.FromString ("Arial 8");
+			layout.SetText (Value.ToString () + "%"); 
+			window.DrawLayout (gc, expose_area.X + expose_area.Width / 2 - (layout.Text.Length * 6 / 2), cell_area.Y + (int)((float)cell_area.Height / 2) - 6, layout);
+		}
+	}
+	
+	[TreeNode (ListOnly=true)]
+	public class TorrentInfoRow : Gtk.TreeNode
+	{
+		string song_title;
+	
+		public TorrentInfoRow (string Tname, string State, string Status, string Ds, string Us, string sc, Torrent torrent, int index)
+		{
+			Index = index;
+			this.torrent = torrent;
+			this.Tname = Tname;
+			this.State = State;
+			this.Status = Status;
+			this.Ds = Ds;
+			this.Us = Us;
+			this.song_title = song_title;
+			SeedCount = sc;
+		}
+	
+		public Torrent torrent;
+		public int Index;
+	        [Gtk.TreeNodeValue (Column = 0)]
+		public string State;
+	        [Gtk.TreeNodeValue (Column = 1)]
+		public string Status;
+	        [Gtk.TreeNodeValue(Column = 2)]
+		public string Ds;
+			[Gtk.TreeNodeValue(Column = 3)]
+		public string Us;
+			[Gtk.TreeNodeValue (Column = 4)]
+		public int Statusprogress;
+			[Gtk.TreeNodeValue(Column = 5)]
+		public string SeedCount;
+		public string Tname;
+	
+	}
 
 public partial class MainWindow : Gtk.Window
 {
-	//TODO разделение новых торрентов и старых закачек 
-	//TODO Открытие диалога с параметрами торрента до начала скачивания нового торрента
 	//TODO Хранение параметров старых закачек на харде
-	//TODO добавить возможность работы с торрентами на распределенных хеш таблицах
+	//TODO добавить возможность работы с торрентами на распределенных хеш таблицах (DHT) (?)
+	//TODO Добавить значек торента в трей
 	ClientEngine engine;
 	List<TorrentManager> managers = new List<TorrentManager> ();
 	Gtk.Menu jBox;
 	Gtk.MenuItem MenuItem3;
+	MonoTorrent.Dht.Listeners.DhtListener listener;
+	DhtEngine de;
+	string path = "dht.data";
 	string fastResumePath = "FastResume.Data";
-	[TreeNode (ListOnly=true)]
- 	public class TorrentInfoRow : Gtk.TreeNode 
- 	{
-        string song_title;
 
-        public TorrentInfoRow (string Tname,string State, string Status, string Ds, string Us, string sc, Torrent torrent, int index)
-        {
-    		Index = index;
-    		this.torrent = torrent;
-    		this.Tname = Tname;
-            this.State=State;
-            this.Status = Status;
-            this.Ds = Ds;
-            this.Us = Us;
-            this.song_title = song_title;
-            SeedCount = sc;
-        }
-
-		public Torrent torrent;
-		public int Index;
-		
-        [Gtk.TreeNodeValue (Column = 0)]
-        public string State;
-
-        [Gtk.TreeNodeValue (Column = 1)]
-        public string Status;
-        
-        [Gtk.TreeNodeValue(Column = 2)]
-		public string Ds;
-
-		[Gtk.TreeNodeValue(Column = 3)]
-		public string Us;
-		
-		[Gtk.TreeNodeValue (Column = 4)]
-        public int Statusprogress;
-        
-		[Gtk.TreeNodeValue(Column = 5)]
-		public string SeedCount;
-		
-		public string Tname;
-
-    }
-	
-	class CellRendererProgressBar : CellRendererProgress
-	{
-		public CellRendererProgressBar() : base()
-		{
-			
-		}
-		
-		protected override void Render (Gdk.Drawable window, Widget widget, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, Gdk.Rectangle expose_area, CellRendererState flags)
-		{
-			// Don't call base Render method of CellRendererProgress (it's looking badly on Windows)
-			
-			Gdk.GC gc = new Gdk.GC(window);
-			
-			gc.RgbFgColor = new Gdk.Color(0,0,0);
-			window.DrawRectangle(gc,true,cell_area.X,cell_area.Y,cell_area.Width,cell_area.Height);
-			
-			gc.RgbFgColor = new Gdk.Color(255,255,255);
-			window.DrawRectangle(gc,true,cell_area.X+1,cell_area.Y+1,cell_area.Width-2,cell_area.Height-2);
-			
-			gc.RgbFgColor = new Gdk.Color(130,0,200);
-			window.DrawRectangle(gc,true,cell_area.X+2,cell_area.Y+2,(cell_area.Width-4)*Value/100, cell_area.Height-4);
-			
-			Pango.Layout layout = new Pango.Layout (widget.PangoContext);
-			gc.RgbFgColor = new Gdk.Color(0,0,0);
-            layout.Wrap = Pango.WrapMode.Word;
-            layout.FontDescription = FontDescription.FromString ("Arial 8");
-            layout.SetText(Value.ToString()+"%"); 
-			window.DrawLayout (gc, expose_area.X + expose_area.Width/2 - (layout.Text.Length*6/2),cell_area.Y+(int)((float)cell_area.Height/2) -6, layout);
-		}
-	}
 	
 	public MainWindow () : base(Gtk.WindowType.Toplevel)
 	{
@@ -105,19 +103,15 @@ public partial class MainWindow : Gtk.Window
 		EngineSettings es = new EngineSettings ();
 		es.PreferEncryption = false;
 		es.AllowedEncryption = EncryptionTypes.All;
-		es.MaxOpenFiles = 5;
-		es.GlobalMaxConnections = 10;
-		es.GlobalMaxHalfOpenConnections=10;
+		
 		
 		engine = new MonoTorrent.Client.ClientEngine (es);
-		
-		CellRendererProgressBar g= new CellRendererProgressBar();
 		
 		engine.StatsUpdate += UpdateAll;
 		
 		nodeview2.NodeStore = new NodeStore (typeof(TorrentInfoRow));
 		nodeview2.AppendColumn ("Status", new Gtk.CellRendererText (), "text", 0);
-		nodeview2.AppendColumn ("Progress", g, "value", 4);
+		nodeview2.AppendColumn ("Progress",  new CellRendererProgressBar(), "value", 4);
 		nodeview2.AppendColumn ("Ds" + "(КБ/с)", new Gtk.CellRendererText (), "text", 2);
 		nodeview2.AppendColumn ("Us" + "(КБ/с)", new Gtk.CellRendererText (), "text", 3);
 		nodeview2.AppendColumn ("Seeds", new Gtk.CellRendererText (), "text", 5);
@@ -152,12 +146,24 @@ public partial class MainWindow : Gtk.Window
 		}
 		//engine.StopAll();
 		LoadFastResume(managers);
+		
+		StartDht (22334);
 		// Working only with Gtk.Window object! (except [GLib.ConnectBeforeAttribute] attribute is defined on callback method)
 		nodeview2.ButtonPressEvent += HandleNodeview2ButtonPressEvent; 
 		
 		nodeview2.ShowAll ();
 		
+		engine.LocalPeerSearchEnabled = true;
+		
 		engine.StartAll ();
+	}
+
+	void HandleEngineDhtEnginePeersFound (object sender, PeersFoundEventArgs e)
+	{
+		TreePath g = new TreePath ();
+		nodeview2.GetPathAtPos (0, 0, out g);
+		(nodeview2.NodeStore.GetNode (g) as TorrentInfoRow).SeedCount = e.Peers.Count.ToString();
+		nodeview2.QueueDraw ();
 	}
 	
 	[GLib.ConnectBeforeAttribute]  // without it, the ButtonPress event of nodeview2 doesn't invoked
@@ -215,15 +221,17 @@ public partial class MainWindow : Gtk.Window
 		// Load a .torrent file into memory
 		Torrent torrent = Torrent.Load (path);
 		// Set all the files to not download
-	//	foreach (TorrentFile file in torrent.Files)
-	//		file.Priority = Priority.DoNotDownload;
+		//foreach (TorrentFile file in torrent.Files)
+		//	file.Priority = Priority.DoNotDownload;
 		
 		// Set the first file as high priority and the second one as normal
 		//torrent.Files[0].Priority = Priority.Highest;
-		//torrent.Files[1].Priority = Priority.Normal;
-		
-		TorrentManager manager = new TorrentManager (torrent, "Downloads", new TorrentSettings ());
-		//manager.HashCheck (false);
+		TorrentSettings ts =  new TorrentSettings ();
+		ts.EnablePeerExchange = true;
+		//ts.InitialSeedingEnabled = true;
+		ts.UseDht = true;
+		TorrentManager manager = new TorrentManager (torrent, "Downloads", ts);
+		manager.PeersFound += HandleManagerPeersFound;
 		managers.Add (manager);
 		
 		engine.Register(manager);
@@ -233,7 +241,7 @@ public partial class MainWindow : Gtk.Window
 		picker = new PriorityPicker (picker);
 		manager.ChangePicker (picker);
 		
-		nodeview2.NodeStore.AddNode (new TorrentInfoRow (manager.Torrent.Name, manager.State.ToString (), manager.Torrent.Name.Substring (0, 10), "-0", "0", "-0", torrent, managers.Count -1));
+		nodeview2.NodeStore.AddNode (new TorrentInfoRow (manager.Torrent.Name, manager.State.ToString (), manager.Torrent.Name.Substring (0, 10), "0", "0", "0", torrent, managers.Count -1));
 		nodeview2.Columns[0].MinWidth=100;
 		nodeview2.Columns[1].MinWidth = 80;
 		nodeview2.Columns[2].MinWidth = 65;
@@ -242,9 +250,14 @@ public partial class MainWindow : Gtk.Window
 		nodeview2.NodeSelection.Changed += new System.EventHandler (OnSelectionChanged);
 	}
 
+	void HandleManagerPeersFound (object sender, PeersAddedEventArgs e)
+	{
+		TreePath g = new TreePath();
+		nodeview2.GetPathAtPos(0,0,out g);
+		(nodeview2.NodeStore.GetNode(g) as TorrentInfoRow).SeedCount = e.ExistingPeers+"("+ e.NewPeers+")";
+		nodeview2.QueueDraw ();
+	}
 
-
-	
 	void OnSelectionChanged (object o, System.EventArgs args)
 	{
 		Gtk.NodeSelection selection = (Gtk.NodeSelection)o;
@@ -254,12 +267,13 @@ public partial class MainWindow : Gtk.Window
 			TorrentInfoRow node = (TorrentInfoRow)selection.SelectedNode;
 			statusbar1.Push(0,node.Tname);
 		}else
-			statusbar1.Push (0, ""); 
+			statusbar1.Push (0, "DHT: " + engine.DhtEngine.State.ToString ());
 	}
 	
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
 	{
 		SaveFastResume (managers);
+		StopDht();
 		engine.StopAll ();
 		Application.Quit ();
 		a.RetVal = true;
@@ -277,9 +291,10 @@ public partial class MainWindow : Gtk.Window
 			row.Statusprogress = (int)(tm.Progress);
 			row.Ds = ((float)tm.Monitor.DownloadSpeed/1000).ToString("0.0");
 			row.Us = ((float)tm.Monitor.UploadSpeed /1000).ToString("0.0");
-			row.SeedCount = tm.Peers.Seeds.ToString();
+			//row.SeedCount = tm.Peers.Seeds.ToString();
 			i++;
 		}
+		//statusbar1.Push(0, engine.DhtEngine.State.ToString());
 		nodeview2.QueueDraw();
 	}
 	
@@ -330,7 +345,50 @@ public partial class MainWindow : Gtk.Window
 					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (manager.Torrent);
 					ts.Show ();
 				}
+
 		}
+		
 	}
+	
+         public void StartDht ( int port)
+         {
+             // Send/receive DHT messages on the specified port
+             IPEndPoint listenAddress = new IPEndPoint (IPAddress.Any, port);
+ 	
+             // Create a listener which will process incoming/outgoing dht messages
+             listener = new MonoTorrent.Dht.Listeners.DhtListener(listenAddress);
+ 
+             // Create the dht engine
+             DhtEngine de = new DhtEngine (listener);
+ 
+             // Connect the Dht engine to the MonoTorrent engine
+             engine.RegisterDht (de);
+ 
+             // Start listening for dht messages and activate the DHT engine
+             listener.Start ();
+ 
+             // If there are existing DHT nodes stored on disk, load them
+             // into the DHT engine so we can try and avoid a (very slow)
+             // full bootstrap
+             byte[] nodes = null;
+            
+             if (File.Exists (path))
+                 nodes = File.ReadAllBytes (path);
+             de.Start (nodes);
+         }
+ 
+         public void StopDht ()
+         {
+             // Stop the listener and dht engine. This does not
+             // clear internal data so the DHT can be started again
+             // later without needing a full bootstrap.
+             listener.Stop ();
+             de.Stop ();
+ 
+             // Save all known dht nodes to disk so they can be restored
+             // later. This is *highly* recommended as it makes startup
+             // much much faster.
+             File.WriteAllBytes (path, de.SaveNodes ());
+         }	
 }
 
