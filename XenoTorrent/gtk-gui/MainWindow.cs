@@ -15,7 +15,7 @@ public partial class MainWindow
 		this.Events = ((global::Gdk.EventMask)(768));
 		this.ExtensionEvents = ((global::Gdk.ExtensionMode)(1));
 		this.Name = "MainWindow";
-		this.Title = global::Mono.Unix.Catalog.GetString ("Xeno Torrent 1");
+		this.Title = global::Mono.Unix.Catalog.GetString ("Xeno Torrent");
 		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 		// Container child MainWindow.Gtk.Container+ContainerChild
 		this.vbox1 = new global::Gtk.VBox ();

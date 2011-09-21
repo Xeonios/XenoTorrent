@@ -92,14 +92,16 @@ public partial class MainWindow : Gtk.Window
 	Gtk.MenuItem MenuItem3;
 	MonoTorrent.Dht.Listeners.DhtListener listener;
 	DhtEngine de;
+    public string dp,tp;	
 	string path = "dht.data";
 	string fastResumePath = "FastResume.Data";
 
 	
-	public MainWindow () : base(Gtk.WindowType.Toplevel)
+	public MainWindow (string tp, string dp) : base(Gtk.WindowType.Toplevel)
 	{
 		Build ();
-		
+		this.tp = tp;
+		this.dp = dp;
 		EngineSettings es = new EngineSettings ();
 		es.PreferEncryption = false;
 		es.AllowedEncryption = EncryptionTypes.All;
@@ -130,7 +132,7 @@ public partial class MainWindow : Gtk.Window
 		MenuItem3.ButtonReleaseEvent += HandleMenuItem3ButtonReleaseEvent;
 		jBox.Add (MenuItem3);
 		
-		foreach (string file in Directory.GetFiles ("torrents"))
+		foreach (string file in Directory.GetFiles (tp))
 		{
 			if (file.EndsWith (".torrent"))
 			{
@@ -196,7 +198,7 @@ public partial class MainWindow : Gtk.Window
 	
 	void HandleMenuItem3ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
-		System.Diagnostics.Process.Start("Downloads/"+ ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent.Name);
+		System.Diagnostics.Process.Start(dp+"/"+ ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent.Name);
 		
 	}
 
@@ -230,7 +232,7 @@ public partial class MainWindow : Gtk.Window
 		ts.EnablePeerExchange = true;
 		//ts.InitialSeedingEnabled = true;
 		ts.UseDht = true;
-		TorrentManager manager = new TorrentManager (torrent, "Downloads", ts);
+		TorrentManager manager = new TorrentManager (torrent, dp, ts);
 		manager.PeersFound += HandleManagerPeersFound;
 		managers.Add (manager);
 		
@@ -324,7 +326,7 @@ public partial class MainWindow : Gtk.Window
 	{
 		// Read the main dictionary from disk and iterate through
 		// all the fast resume items
-		if (File.Exists(fastResumePath))
+		if (File.Exists(fastResumePath)&&(managers.Count>0))
 		{
 			BEncodedList list = (BEncodedList) BEncodedValue.Decode (File.ReadAllBytes (fastResumePath));
 			foreach (BEncodedDictionary fastResume in list) 
@@ -335,7 +337,7 @@ public partial class MainWindow : Gtk.Window
 				// Find the torrentmanager that the fastresume belongs to
 				// and then load it
 				foreach (TorrentManager manager in managers) 
-					if (manager.InfoHash == data.Infohash)
+					if ((manager.InfoHash == data.Infohash))
 						manager.LoadFastResume (data);
 			}
 			foreach (TorrentManager manager in managers) 

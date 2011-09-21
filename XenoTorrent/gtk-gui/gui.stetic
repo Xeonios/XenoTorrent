@@ -11,7 +11,7 @@
     <property name="MemberName" />
     <property name="Events">ButtonPressMask, ButtonReleaseMask</property>
     <property name="ExtensionEvents">All</property>
-    <property name="Title" translatable="yes">Xeno Torrent 1</property>
+    <property name="Title" translatable="yes">Xeno Torrent</property>
     <property name="WindowPosition">CenterOnParent</property>
     <signal name="DeleteEvent" handler="OnDeleteEvent" />
     <child>
