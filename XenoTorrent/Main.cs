@@ -7,7 +7,7 @@ namespace XenoTorrent
 {
 	class MainClass
 	{
-		static string tp,dp;
+		static string tp,dp,ep;
 		private static StatusIcon trayIcon;
 		
 		public static void Main (string[] args)
@@ -37,7 +37,10 @@ namespace XenoTorrent
 			
 			Application.Init ();
 			MainWindow win = new MainWindow (tp,dp);
-			trayIcon = new StatusIcon (new Pixbuf ("1.png"));
+			if (File.Exists(ep+"/1.png"))
+				trayIcon = new StatusIcon (new Pixbuf (ep+"/1.png"));
+			else
+				trayIcon = new StatusIcon();
 			trayIcon.Visible = true;
  
 			// Show/Hide the window (even from the Panel/Taskbar) when the TrayIcon has been clicked.
@@ -74,32 +77,50 @@ namespace XenoTorrent
 				string[] st;
 			
 				StreamReader sr = new StreamReader ("ini.txt");
-				s = sr.ReadLine ();
-				st = s.Split (("=") [0]);
-				tp = st [1];
-				s = sr.ReadLine ();
-				st = s.Split (("=") [0]);
-				dp = st [1];
-				sr.Close ();
+				try
+				{
+					s = sr.ReadLine ();
+					st = s.Split (("=") [0]);
+					tp = st [1];
+					s = sr.ReadLine ();
+					st = s.Split (("=") [0]);
+					dp = st [1];
+					s = sr.ReadLine ();
+					st = s.Split (("=") [0]);
+					ep = st [1];
+					sr.Close ();
+				}
+				catch
+				{
+					sr.Close();
+					NewIni();
+				}
 		}
 		else
 		{
-			PlatformID p = Environment.OSVersion.Platform;
-			string[] st = new string[2];
-			if (p == PlatformID.Unix)
-			{
-				st[0] = "TorrentPath=TorrentFiles";
-				st[1] = "DownloadPath=Downloads";
-			}
-			
-			if (p == PlatformID.Win32Windows)
-			{
-					st [0] = "TorrentPath=c:\\TorrentFiles";
-					st [1] = "DownloadPath=c:\\Downloads";
-			}
-			File.WriteAllLines("ini.txt",st);
-			InitSettings();
+			NewIni();
 		}
+	}
+	
+	static void NewIni()
+	{
+		PlatformID p = Environment.OSVersion.Platform;
+		string[] st = new string[3];
+		if (p == PlatformID.Unix)
+		{
+			st[0] = "TorrentPath=TorrentFiles";
+			st[1] = "DownloadPath=Downloads";
+			st[2] = "ExePath="+Directory.GetCurrentDirectory();
+		}
+		
+		if (p == PlatformID.Win32Windows)
+		{
+				st [0] = "TorrentPath=c:\\TorrentFiles";
+				st [1] = "DownloadPath=c:\\Downloads";
+				st[2] = "ExePath="+Directory.GetCurrentDirectory();
+		}
+		File.WriteAllLines("ini.txt",st);
+		InitSettings();
 	}
 	}
 }

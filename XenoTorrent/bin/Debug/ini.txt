@@ -1,2 +1,3 @@
 TorrentPath=/home/x/TorrentFiles
 DownloadPath=/home/x/Downloads
+ExePath=/home/x/git/XenoTorrent/XenoTorrent/bin/Debug
