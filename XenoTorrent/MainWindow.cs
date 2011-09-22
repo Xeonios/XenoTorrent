@@ -95,7 +95,7 @@ public partial class MainWindow : Gtk.Window
     public string dp,tp;	
 	string path = "dht.data";
 	string fastResumePath = "FastResume.Data";
-
+	int[] newTorrents;
 	
 	public MainWindow (string tp, string dp) : base(Gtk.WindowType.Toplevel)
 	{
@@ -148,7 +148,7 @@ public partial class MainWindow : Gtk.Window
 		}
 		//engine.StopAll();
 		LoadFastResume(managers);
-		
+		newTorrents = new int[managers.Count];
 		StartDht (22334);
 		// Working only with Gtk.Window object! (except [GLib.ConnectBeforeAttribute] attribute is defined on callback method)
 		nodeview2.ButtonPressEvent += HandleNodeview2ButtonPressEvent; 
@@ -162,10 +162,7 @@ public partial class MainWindow : Gtk.Window
 
 	void HandleEngineDhtEnginePeersFound (object sender, PeersFoundEventArgs e)
 	{
-		TreePath g = new TreePath ();
-		nodeview2.GetPathAtPos (0, 0, out g);
-		(nodeview2.NodeStore.GetNode (g) as TorrentInfoRow).SeedCount = e.Peers.Count.ToString();
-		nodeview2.QueueDraw ();
+		//
 	}
 	
 	[GLib.ConnectBeforeAttribute]  // without it, the ButtonPress event of nodeview2 doesn't invoked
@@ -175,7 +172,7 @@ public partial class MainWindow : Gtk.Window
 		{
 			if ((args.Event.Button==1))
 			{
-					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent);
+					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent, dp);
 					ts.Show ();
 			}
 			
@@ -253,11 +250,12 @@ public partial class MainWindow : Gtk.Window
 	}
 
 	void HandleManagerPeersFound (object sender, PeersAddedEventArgs e)
-	{
-		TreePath g = new TreePath();
-		nodeview2.GetPathAtPos(0,0,out g);
-		(nodeview2.NodeStore.GetNode(g) as TorrentInfoRow).SeedCount = e.ExistingPeers+"("+ e.NewPeers+")";
-		nodeview2.QueueDraw ();
+	{	
+		foreach (TorrentInfoRow row in nodeview2.NodeStore)
+		{
+			if (row.torrent == e.TorrentManager.Torrent)
+				newTorrents[row.Index] = e.NewPeers;
+		}
 	}
 
 	void OnSelectionChanged (object o, System.EventArgs args)
@@ -293,7 +291,7 @@ public partial class MainWindow : Gtk.Window
 			row.Statusprogress = (int)(tm.Progress);
 			row.Ds = ((float)tm.Monitor.DownloadSpeed/1000).ToString("0.0");
 			row.Us = ((float)tm.Monitor.UploadSpeed /1000).ToString("0.0");
-			//row.SeedCount = tm.Peers.Seeds.ToString();
+			row.SeedCount = tm.Peers.Seeds.ToString()+"("+newTorrents[i]+")";
 			i++;
 		}
 		//statusbar1.Push(0, engine.DhtEngine.State.ToString());
@@ -344,7 +342,7 @@ public partial class MainWindow : Gtk.Window
 				if (!manager.HashChecked)
 				{
 					manager.HashCheck(true);
-					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (manager.Torrent);
+					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (manager.Torrent,dp);
 					ts.Show ();
 				}
 
@@ -362,7 +360,7 @@ public partial class MainWindow : Gtk.Window
  
              // Create the dht engine
              DhtEngine de = new DhtEngine (listener);
- 
+				de.StateChanged += HandleDeStateChanged;
              // Connect the Dht engine to the MonoTorrent engine
              engine.RegisterDht (de);
  
@@ -378,6 +376,12 @@ public partial class MainWindow : Gtk.Window
                  nodes = File.ReadAllBytes (path);
              de.Start (nodes);
          }
+
+         void HandleDeStateChanged (object sender, EventArgs e)
+         {
+			if (nodeview2.NodeSelection.SelectedNode == null)
+         		statusbar1.Push(0, "DHT: " + (sender as DhtEngine).State.ToString());
+         }
  
          public void StopDht ()
          {
@@ -385,12 +389,13 @@ public partial class MainWindow : Gtk.Window
              // clear internal data so the DHT can be started again
              // later without needing a full bootstrap.
              listener.Stop ();
+             File.WriteAllBytes (path, de.SaveNodes ());
              de.Stop ();
  
              // Save all known dht nodes to disk so they can be restored
              // later. This is *highly* recommended as it makes startup
              // much much faster.
-             File.WriteAllBytes (path, de.SaveNodes ());
+            
          }	
 }
 

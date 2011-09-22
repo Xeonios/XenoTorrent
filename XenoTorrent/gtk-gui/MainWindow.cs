@@ -16,7 +16,6 @@ public partial class MainWindow
 		this.ExtensionEvents = ((global::Gdk.ExtensionMode)(1));
 		this.Name = "MainWindow";
 		this.Title = global::Mono.Unix.Catalog.GetString ("Xeno Torrent");
-		this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 		// Container child MainWindow.Gtk.Container+ContainerChild
 		this.vbox1 = new global::Gtk.VBox ();
 		this.vbox1.Events = ((global::Gdk.EventMask)(768));
@@ -52,8 +51,8 @@ public partial class MainWindow
 		{
 			this.Child.ShowAll ();
 		}
-		this.DefaultWidth = 374;
-		this.DefaultHeight = 238;
+		this.DefaultWidth = 372;
+		this.DefaultHeight = 227;
 		this.Show ();
 		this.DeleteEvent += new global::Gtk.DeleteEventHandler (this.OnDeleteEvent);
 	}

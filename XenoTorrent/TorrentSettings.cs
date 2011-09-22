@@ -8,12 +8,13 @@ namespace XenoTorrent
 	public partial class TorrentSettings : Gtk.Dialog
 	{
 		Torrent torrent;
+		string dp;
 		//TODO Автоматическое принятие изменений в столбце Priority при нажатии кнопки "ok" 
 		//TODO Статистика торрента
-		public TorrentSettings (Torrent t)
+		public TorrentSettings (Torrent t,string dp)
 		{
 			this.Build ();
-			
+			this.dp = dp;
 			torrent = t;
 			Title = t.Name;
 			CellRendererText crte = new CellRendererText();
@@ -61,11 +62,11 @@ namespace XenoTorrent
 			{
 				if (file.Priority != Priority.DoNotDownload)
 				{
-					tfileListStore.AppendValues (file.Path, true, (int)(file.BytesDownloaded / file.Length) * 100, ((float)file.Length / 1024 / 1024).ToString ("0.00"),  file.Priority.ToString());
+					tfileListStore.AppendValues (file.Path, true, (int)(((float)file.BytesDownloaded / (float) file.Length) * 100), ((float)file.Length / 1024 / 1024).ToString ("0.00"),  file.Priority.ToString());
 				}
 				else
 				{
-					tfileListStore.AppendValues (file.Path, false, (int)(file.BytesDownloaded / file.Length) * 100, ((float)file.Length / 1024 / 1024).ToString ("0.00"),  "Normal");	
+					tfileListStore.AppendValues (file.Path, false, (int)(((float)file.BytesDownloaded / (float)file.Length) * 100), ((float)file.Length / 1024 / 1024).ToString ("0.00"),  "Normal");	
 				}
 
 					
@@ -76,8 +77,26 @@ namespace XenoTorrent
 			
 			treeview1.Model = tfileListStore;
 			treeview1.ShowAll();
+			
+			TorrentInfo();
 		}
+		
+		void TorrentInfo()
+		{
+			textview1.Buffer.Text += "Name: "+ torrent.Name+"\n\n";
+			textview1.Buffer.Text += "PublisherUrl: " + torrent.PublisherUrl + "\n\n";
+			textview1.Buffer.Text += "TorrentPath: " + torrent.TorrentPath + "\n\n";
+			textview1.Buffer.Text += "Download Path: " + dp + "\n\n";
+			textview1.Buffer.Text += "CreationDate: " + torrent.CreationDate + "\n\n";
+			textview1.Buffer.Text += "Encoding: " + torrent.Encoding + "\n\n";
 
+
+			textview1.Buffer.Text += "CreatedBy: " + torrent.CreatedBy + "\n";
+			textview1.Buffer.Text += "Comment: " + torrent.Comment + "\n";
+			textview1.Buffer.Text += "Publisher: " + torrent.Publisher + "\n";
+			textview1.Buffer.Text += "Source: " + torrent.Source + "\n";
+		}
+		
 		void HandleCrcEdited (object o, EditedArgs args)
 		{
 			TreeIter it = new TreeIter ();			
@@ -100,13 +119,13 @@ namespace XenoTorrent
 		}
 		
 		[GLib.ConnectBeforeAttribute]
-		protected virtual void OnButtonCancelPress (object o, Gtk.ButtonPressEventArgs args)
+		protected virtual void OnButtonCancelPress (object o, Gtk.ButtonReleaseEventArgs args)
 		{
 			//this.HideAll();
 			this.Destroy();
 		}
 		
-		//[GLib.ConnectBeforeAttribute]
+		[GLib.ConnectBeforeAttribute]
 		protected virtual void OnButtonOkPress (object o, Gtk.ButtonReleaseEventArgs args)
 		{
 			TreeIter it = new TreeIter ();

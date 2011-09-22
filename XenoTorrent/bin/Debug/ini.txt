@@ -1,0 +1,2 @@
+TorrentPath=/home/x/TorrentFiles
+DownloadPath=/home/x/Downloads

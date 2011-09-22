@@ -34,7 +34,7 @@ namespace XenoTorrent
 			this.notebook1 = new global::Gtk.Notebook ();
 			this.notebook1.CanFocus = true;
 			this.notebook1.Name = "notebook1";
-			this.notebook1.CurrentPage = 0;
+			this.notebook1.CurrentPage = 1;
 			// Container child notebook1.Gtk.Notebook+NotebookChild
 			this.GtkScrolledWindow = new global::Gtk.ScrolledWindow ();
 			this.GtkScrolledWindow.Name = "GtkScrolledWindow";
@@ -114,7 +114,7 @@ namespace XenoTorrent
 			this.DefaultWidth = 575;
 			this.DefaultHeight = 473;
 			this.Show ();
-			this.buttonCancel.ButtonPressEvent += new global::Gtk.ButtonPressEventHandler (this.OnButtonCancelPress);
+			this.buttonCancel.ButtonReleaseEvent += new global::Gtk.ButtonReleaseEventHandler (this.OnButtonCancelPress);
 			this.buttonOk.ButtonReleaseEvent += new global::Gtk.ButtonReleaseEventHandler (this.OnButtonOkPress);
 		}
 	}

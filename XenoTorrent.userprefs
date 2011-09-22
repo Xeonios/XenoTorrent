@@ -2,17 +2,17 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
   <MonoDevelop.Ide.Workbench ActiveDocument="XenoTorrent/Main.cs">
     <Files>
-      <File FileName="XenoTorrent/Main.cs" Line="20" Column="31" />
-      <File FileName="XenoTorrent/MainWindow.cs" Line="150" Column="3" />
+      <File FileName="XenoTorrent/Main.cs" Line="47" Column="5" />
+      <File FileName="XenoTorrent/MainWindow.cs" Line="383" Column="12" />
       <File FileName="XenoTorrent/TorrentSettings.cs" Line="1" Column="1" />
-      <File FileName="../monotorrent/src/DhtSampleClient/Program.cs" Line="6" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
+          <Option id="ShowVersionControlOverlays" value="True" />
+          <Option id="ShowAllFiles" value="False" />
           <Node name="XenoTorrent" expanded="True">
-            <Option id="ShowVersionControlOverlays" value="True" />
-            <Option id="ShowAllFiles" value="False" />
+            <Option id="ShowAllFiles" value="True" />
             <Node name="References" expanded="True" />
             <Node name="Main.cs" selected="True" />
           </Node>
@@ -22,10 +22,7 @@
         <State expanded="True" selected="True" />
       </Pad>
       <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>width</Value>
-          <Value>sv_width</Value>
-        </State>
+        <State />
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
