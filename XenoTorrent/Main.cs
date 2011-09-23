@@ -37,25 +37,28 @@ namespace XenoTorrent
 			}
 
 			Application.Init ();
-			MainWindow win = new MainWindow (tp,dp);
-			Console.WriteLine(ep+"/1.png");
+			
 			if (File.Exists(ep+"/1.png"))
 				trayIcon = new StatusIcon (new Pixbuf (ep+"/1.png"));
 			else
 				trayIcon = new StatusIcon();
 			trayIcon.Visible = true;
  
-			// Show/Hide the window (even from the Panel/Taskbar) when the TrayIcon has been clicked.
-			trayIcon.Activate += delegate {
-				win.Visible = !win.Visible; 
-				win.Move (win.Screen.Width - 385, win.Screen.Height - 320);
-				};
+
 			// Show a pop up menu when the icon has been right clicked.
 			trayIcon.PopupMenu += OnTrayIconPopup;
 			// A Tooltip for the Icon
 			trayIcon.Tooltip = "XenoTorrent";
-			win.Show ();
+			
+			MainWindow win = new MainWindow (tp,dp,ep, trayIcon);
+			
+			// Show/Hide the window (even from the Panel/Taskbar) when the TrayIcon has been clicked.
+			trayIcon.Activate += delegate {
+				win.Move (win.Screen.Width - 385, win.Screen.Height - 320);
+				win.Visible = !win.Visible; 
+				};
 			win.Move (win.Screen.Width - 385, win.Screen.Height - 320);
+			win.Show ();
 			Application.Run ();
 		}
 	static void OnTrayIconPopup (object o, EventArgs args)
@@ -67,7 +70,22 @@ namespace XenoTorrent
 		popupMenu.Add (menuItemQuit);
 		// Quit the application when quit has been clicked.
 		menuItemQuit.Activated += delegate {
+			File.Delete(ep+"/Error.txt");
+			trayIcon.Dispose();
 			Application.Quit (); };
+			
+		MenuItem menuItemlog = new ImageMenuItem ("Log");
+		popupMenu.Add (menuItemlog);
+		// Quit the application when quit has been clicked.
+		if (File.Exists(ep+"/Error.txt"))
+		{
+			menuItemlog.Activated += delegate {
+				System.Diagnostics.Process.Start(ep+"/Error.txt");
+			};
+			menuItemlog.Sensitive = true;
+		}
+		else menuItemlog.Sensitive = false;
+			
 		popupMenu.ShowAll ();
 		popupMenu.Popup ();
 	}
@@ -111,12 +129,12 @@ namespace XenoTorrent
 			st[1] = "DownloadPath=" + ep + "/Downloads";
 		}
 		
-		if (p == PlatformID.Win32Windows)
+		if (p == PlatformID.Win32NT)
 		{
-				st [0] = "TorrentPath=" + ep + "/TorrentFiles";
-				st [1] = "DownloadPath=" + ep + "/Downloads";
+				st [0] = "TorrentPath=" + ep + "\\TorrentFiles";
+				st [1] = "DownloadPath=" + ep + "\\Downloads";
 		}
-		File.WriteAllLines("ini.txt",st);
+		File.WriteAllLines(ep + "/ini.txt", st);
 		InitSettings();
 	}
 	}

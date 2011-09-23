@@ -81,32 +81,67 @@ using System.Threading;
 	
 	}
 
+/*public class Managers
+{
+	List<TorrentManager> managers;
+	List<bool> IsLFastLoaded;
+	
+	public Managers()
+	{
+		 managers = new List<TorrentManager> ();
+	}
+	
+	public TorrentManager this[int index]
+	{
+		get 
+		{
+			return managers[index];
+		}
+		
+		set 
+		{
+			managers[index] = value;	
+		}
+	}
+	
+	public void Add(TorrentManager t)
+	{
+		managers.Add(t);
+	}
+}*/
+
 public partial class MainWindow : Gtk.Window
 {
 	//TODO Хранение параметров старых закачек на харде
 	//TODO добавить возможность работы с торрентами на распределенных хеш таблицах (DHT) (?)
 	//TODO Добавить значек торента в трей
 	ClientEngine engine;
-	List<TorrentManager> managers = new List<TorrentManager> ();
+
 	Gtk.Menu jBox;
 	Gtk.MenuItem MenuItem3;
 	MonoTorrent.Dht.Listeners.DhtListener listener;
 	DhtEngine de;
-    public string dp,tp;	
-	string path = "dht.data";
-	string fastResumePath = "FastResume.Data";
+    public string dp,tp, ep;	
+	string dhtpath;
+	string fastResumePath;
 	int[] newTorrents;
+	StatusIcon si;
+	List<TorrentManager> managers;
 	
-	public MainWindow (string tp, string dp) : base(Gtk.WindowType.Toplevel)
+	public MainWindow (string tp, string dp, string ep, StatusIcon si) : base(Gtk.WindowType.Toplevel)
 	{
 		Build ();
 		this.tp = tp;
 		this.dp = dp;
+		this.si = si;
+		this.ep = ep;
+		dhtpath = ep+ "/dht.data";
+		fastResumePath = ep+"/FastResume.Data";
 		EngineSettings es = new EngineSettings ();
 		es.PreferEncryption = false;
 		es.AllowedEncryption = EncryptionTypes.All;
 		
-		
+		managers = new List<TorrentManager>();
 		engine = new MonoTorrent.Client.ClientEngine (es);
 		
 		engine.StatsUpdate += UpdateAll;
@@ -141,7 +176,9 @@ public partial class MainWindow : Gtk.Window
 					LoadTorrent (file);
 				} catch (Exception e)
 				{
-					statusbar1.Push(0, "Couldn't decode: "+file);
+					File.WriteAllText(ep+"/Error.txt","Couldn't decode: "+file);
+					XenoTorrent.TorrentError ts = new XenoTorrent.TorrentError (e.Message,file);
+					ts.Show ();
 					continue;
 				}
 			}
@@ -272,6 +309,8 @@ public partial class MainWindow : Gtk.Window
 	
 	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
 	{
+		File.Delete(ep+"/Error.txt");
+		si.Dispose();
 		SaveFastResume (managers);
 		StopDht();
 		engine.StopAll ();
@@ -324,7 +363,11 @@ public partial class MainWindow : Gtk.Window
 	{
 		// Read the main dictionary from disk and iterate through
 		// all the fast resume items
-		if (File.Exists(fastResumePath)&&(managers.Count>0))
+		List<TorrentManager> temp = new List<TorrentManager>(managers.Count);
+		for (int i = 0; i< managers.Count; i++) 
+			temp.Add(managers[i]);
+		
+		if (File.Exists(fastResumePath))
 		{
 			BEncodedList list = (BEncodedList) BEncodedValue.Decode (File.ReadAllBytes (fastResumePath));
 			foreach (BEncodedDictionary fastResume in list) 
@@ -335,13 +378,16 @@ public partial class MainWindow : Gtk.Window
 				// Find the torrentmanager that the fastresume belongs to
 				// and then load it
 				foreach (TorrentManager manager in managers) 
-					if ((manager.InfoHash == data.Infohash))
+					if (manager.InfoHash == data.Infohash)
+					{
 						manager.LoadFastResume (data);
+						temp.Remove(manager);
+					}
 			}
-			foreach (TorrentManager manager in managers) 
-				if (!manager.HashChecked)
+			
+			foreach (TorrentManager manager in temp) 
 				{
-					manager.HashCheck(true);
+					//manager.HashCheck(true);
 					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (manager.Torrent,dp);
 					ts.Show ();
 				}
@@ -372,8 +418,8 @@ public partial class MainWindow : Gtk.Window
              // full bootstrap
              byte[] nodes = null;
             
-             if (File.Exists (path))
-                 nodes = File.ReadAllBytes (path);
+             if (File.Exists (dhtpath))
+                 nodes = File.ReadAllBytes (dhtpath);
              de.Start (nodes);
          }
 
@@ -389,9 +435,9 @@ public partial class MainWindow : Gtk.Window
              // clear internal data so the DHT can be started again
              // later without needing a full bootstrap.
              listener.Stop ();
-             File.WriteAllBytes (path, de.SaveNodes ());
+             File.WriteAllBytes (dhtpath, de.SaveNodes ());
              de.Stop ();
- 
+
              // Save all known dht nodes to disk so they can be restored
              // later. This is *highly* recommended as it makes startup
              // much much faster.

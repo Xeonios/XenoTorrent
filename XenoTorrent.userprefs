@@ -1,18 +1,19 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="XenoTorrent/Main.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="XenoTorrent\MainWindow.cs">
     <Files>
-      <File FileName="XenoTorrent/Main.cs" Line="41" Column="33" />
-      <File FileName="XenoTorrent/MainWindow.cs" Line="1" Column="1" />
-      <File FileName="XenoTorrent/TorrentSettings.cs" Line="1" Column="1" />
+      <File FileName="XenoTorrent\Main.cs" Line="99" Column="4" />
+      <File FileName="XenoTorrent\MainWindow.cs" Line="421" Column="56" />
+      <File FileName="XenoTorrent\TorrentSettings.cs" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
-        <State expanded="True" selected="True">
-          <Option id="ShowVersionControlOverlays" value="True" />
+        <State expanded="True">
           <Option id="ShowAllFiles" value="False" />
+          <Option id="ShowVersionControlOverlays" value="True" />
           <Node name="XenoTorrent" expanded="True">
             <Option id="ShowAllFiles" value="True" />
+            <Node name="MainWindow.cs" selected="True" />
           </Node>
         </State>
       </Pad>

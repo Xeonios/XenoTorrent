@@ -67,6 +67,8 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="TorrentSettings.cs" />
     <Compile Include="gtk-gui\XenoTorrent.TorrentSettings.cs" />
+    <Compile Include="TorrentError.cs" />
+    <Compile Include="gtk-gui\XenoTorrent.TorrentError.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
