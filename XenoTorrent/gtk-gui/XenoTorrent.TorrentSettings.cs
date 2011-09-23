@@ -107,7 +107,8 @@ namespace XenoTorrent
 			w10.Position = 1;
 			w10.Expand = false;
 			w10.Fill = false;
-			if ((this.Child != null)) {
+			if ((this.Child != null))
+			{
 				this.Child.ShowAll ();
 			}
 			this.DefaultWidth = 575;

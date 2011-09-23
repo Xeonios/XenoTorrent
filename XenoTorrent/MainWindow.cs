@@ -162,6 +162,9 @@ public partial class MainWindow : Gtk.Window
 		Gtk.MenuItem MenuItem2 = new MenuItem ("Остановить");
 		MenuItem2.ButtonReleaseEvent += HandleMenuItem2ButtonReleaseEvent;
 		jBox.Add (MenuItem2);
+		Gtk.MenuItem MenuItem5 = new MenuItem ("Открыть Папку...");
+		MenuItem5.ButtonReleaseEvent += HandleMenuItem5ButtonReleaseEvent;
+		jBox.Add (MenuItem5);
 		MenuItem3 = new MenuItem ("Открыть Файл");
 		MenuItem3.Sensitive = false;
 		MenuItem3.ButtonReleaseEvent += HandleMenuItem3ButtonReleaseEvent;
@@ -197,9 +200,12 @@ public partial class MainWindow : Gtk.Window
 		engine.StartAll ();
 	}
 
-	void HandleEngineDhtEnginePeersFound (object sender, PeersFoundEventArgs e)
+	void HandleMenuItem5ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
-		//
+		if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+			System.Diagnostics.Process.Start ("explorer "+dp);
+		else
+			System.Diagnostics.Process.Start(dp);
 	}
 	
 	[GLib.ConnectBeforeAttribute]  // without it, the ButtonPress event of nodeview2 doesn't invoked

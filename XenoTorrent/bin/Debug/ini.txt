@@ -1,2 +1,2 @@
-TorrentPath=D:\XenoTorrent\XenoTorrent\bin\Debug\TorrentFiles
-DownloadPath=D:\XenoTorrent\XenoTorrent\bin\Debug\Downloads
+TorrentPath=TorrentFiles
+DownloadPath=Downloads

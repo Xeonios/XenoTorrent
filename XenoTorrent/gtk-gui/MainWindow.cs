@@ -47,7 +47,8 @@ public partial class MainWindow
 		w3.Expand = false;
 		w3.Fill = false;
 		this.Add (this.vbox1);
-		if ((this.Child != null)) {
+		if ((this.Child != null))
+		{
 			this.Child.ShowAll ();
 		}
 		this.DefaultWidth = 372;
