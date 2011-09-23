@@ -7,12 +7,14 @@ namespace XenoTorrent
 {
 	class MainClass
 	{
-		static string tp,dp,ep;
+		static string tp,dp;
+		static string ep;
 		private static StatusIcon trayIcon;
 		
 		public static void Main (string[] args)
 		{
-		
+			ep = Path.GetDirectoryName (System.Reflection.Assembly.GetExecutingAssembly ().Location);
+			
 			InitSettings();
 			
 			if (!Directory.Exists(tp))
@@ -34,9 +36,9 @@ namespace XenoTorrent
 				catch{}
 			}
 
-			
 			Application.Init ();
 			MainWindow win = new MainWindow (tp,dp);
+			Console.WriteLine(ep+"/1.png");
 			if (File.Exists(ep+"/1.png"))
 				trayIcon = new StatusIcon (new Pixbuf (ep+"/1.png"));
 			else
@@ -71,12 +73,12 @@ namespace XenoTorrent
 	}
 	public static void InitSettings()
 	{
-		if (File.Exists ("ini.txt"))
+		if (File.Exists (ep+"/ini.txt"))
 		{
 				string s;
 				string[] st;
 			
-				StreamReader sr = new StreamReader ("ini.txt");
+				StreamReader sr = new StreamReader (ep + "/ini.txt");
 				try
 				{
 					s = sr.ReadLine ();
@@ -85,9 +87,6 @@ namespace XenoTorrent
 					s = sr.ReadLine ();
 					st = s.Split (("=") [0]);
 					dp = st [1];
-					s = sr.ReadLine ();
-					st = s.Split (("=") [0]);
-					ep = st [1];
 					sr.Close ();
 				}
 				catch
@@ -108,16 +107,14 @@ namespace XenoTorrent
 		string[] st = new string[3];
 		if (p == PlatformID.Unix)
 		{
-			st[0] = "TorrentPath=TorrentFiles";
-			st[1] = "DownloadPath=Downloads";
-			st[2] = "ExePath="+Directory.GetCurrentDirectory();
+			st[0] = "TorrentPath="+ep+"/TorrentFiles";
+			st[1] = "DownloadPath=" + ep + "/Downloads";
 		}
 		
 		if (p == PlatformID.Win32Windows)
 		{
-				st [0] = "TorrentPath=c:\\TorrentFiles";
-				st [1] = "DownloadPath=c:\\Downloads";
-				st[2] = "ExePath="+Directory.GetCurrentDirectory();
+				st [0] = "TorrentPath=" + ep + "/TorrentFiles";
+				st [1] = "DownloadPath=" + ep + "/Downloads";
 		}
 		File.WriteAllLines("ini.txt",st);
 		InitSettings();
