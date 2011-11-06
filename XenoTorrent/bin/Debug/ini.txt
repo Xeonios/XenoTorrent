@@ -1,2 +1,2 @@
-TorrentPath=TorrentFiles
-DownloadPath=Downloads
+TorrentPath=/home/x/git/XenoTorrent/XenoTorrent/bin/Debug/TorrentFiles
+DownloadPath=/home/x/Downloads

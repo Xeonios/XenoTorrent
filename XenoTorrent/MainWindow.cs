@@ -81,40 +81,11 @@ using System.Threading;
 	
 	}
 
-/*public class Managers
-{
-	List<TorrentManager> managers;
-	List<bool> IsLFastLoaded;
-	
-	public Managers()
-	{
-		 managers = new List<TorrentManager> ();
-	}
-	
-	public TorrentManager this[int index]
-	{
-		get 
-		{
-			return managers[index];
-		}
-		
-		set 
-		{
-			managers[index] = value;	
-		}
-	}
-	
-	public void Add(TorrentManager t)
-	{
-		managers.Add(t);
-	}
-}*/
 
 public partial class MainWindow : Gtk.Window
 {
 	//TODO Хранение параметров старых закачек на харде
 	//TODO добавить возможность работы с торрентами на распределенных хеш таблицах (DHT) (?)
-	//TODO Добавить значек торента в трей
 	ClientEngine engine;
 
 	Gtk.Menu jBox;
@@ -169,6 +140,12 @@ public partial class MainWindow : Gtk.Window
 		MenuItem3.Sensitive = false;
 		MenuItem3.ButtonReleaseEvent += HandleMenuItem3ButtonReleaseEvent;
 		jBox.Add (MenuItem3);
+		Gtk.MenuItem MenuItem6 = new MenuItem ("Удалить торрент");
+		MenuItem6.ButtonReleaseEvent += HandleMenuItem6ButtonReleaseEvent;;
+		jBox.Add (MenuItem6);
+		Gtk.MenuItem MenuItem7 = new MenuItem ("Удалить торрент и файлы");
+		MenuItem7.ButtonReleaseEvent += HandleMenuItem7ButtonReleaseEvent;;
+		jBox.Add (MenuItem7);
 		
 		foreach (string file in Directory.GetFiles (tp))
 		{
@@ -200,10 +177,43 @@ public partial class MainWindow : Gtk.Window
 		engine.StartAll ();
 	}
 
+	void HandleMenuItem7ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
+	{
+		string tpath = managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Torrent.TorrentPath;//tp + "/" +
+		
+		managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Dispose ();
+		
+		if (File.Exists (tpath))
+		{
+			File.Delete (tpath);
+			
+			try
+			{
+				foreach (TorrentFile tf in managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Torrent.Files)
+					File.Delete(tf.FullPath);
+			}catch{}
+			nodeview2.NodeStore.RemoveNode (nodeview2.NodeSelection.SelectedNode);
+		}
+	}
+
+	void HandleMenuItem6ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
+	{
+		string tpath = managers[((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Torrent.TorrentPath;//tp + "/" +
+		
+		managers[((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Dispose();
+		
+		if (File.Exists(tpath))
+		{
+			File.Delete(tpath);
+			
+			nodeview2.NodeStore.RemoveNode(nodeview2.NodeSelection.SelectedNode);
+		}
+	}
+
 	void HandleMenuItem5ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
 		if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-			System.Diagnostics.Process.Start ("explorer "+dp);
+			System.Diagnostics.Process.Start ("C:\\WINDOWS\\explorer" ,dp);
 		else
 			System.Diagnostics.Process.Start(dp);
 	}
@@ -215,8 +225,8 @@ public partial class MainWindow : Gtk.Window
 		{
 			if ((args.Event.Button==1))
 			{
-					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent, dp);
-					ts.Show ();
+				XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent, dp);
+				ts.Show ();
 			}
 			
 			if (args.Event.Button==3)
