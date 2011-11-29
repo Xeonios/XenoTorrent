@@ -5,39 +5,32 @@ namespace Stetic
 	internal class Gui
 	{
 		private static bool initialized;
-        
+		
 		internal static void Initialize (Gtk.Widget iconRenderer)
 		{
-			if ((Stetic.Gui.initialized == false))
-			{
+			if ((Stetic.Gui.initialized == false)) {
 				Stetic.Gui.initialized = true;
 			}
 		}
 	}
-    
+	
 	internal class IconLoader
 	{
 		public static Gdk.Pixbuf LoadIcon (Gtk.Widget widget, string name, Gtk.IconSize size)
 		{
 			Gdk.Pixbuf res = widget.RenderIcon (name, size, null);
-			if ((res != null))
-			{
+			if ((res != null)) {
 				return res;
-			} else
-			{
+			} else {
 				int sz;
 				int sy;
 				global::Gtk.Icon.SizeLookup (size, out  sz, out  sy);
-				try
-				{
+				try {
 					return Gtk.IconTheme.Default.LoadIcon (name, sz, 0);
-				} catch (System.Exception)
-				{
-					if ((name != "gtk-missing-image"))
-					{
+				} catch (System.Exception) {
+					if ((name != "gtk-missing-image")) {
 						return Stetic.IconLoader.LoadIcon (widget, "gtk-missing-image", size);
-					} else
-					{
+					} else {
 						Gdk.Pixmap pmap = new Gdk.Pixmap (Gdk.Screen.Default.RootWindow, sz, sz);
 						Gdk.GC gc = new Gdk.GC (pmap);
 						gc.RgbFgColor = new Gdk.Color (255, 255, 255);
@@ -54,14 +47,14 @@ namespace Stetic
 			}
 		}
 	}
-    
+	
 	internal class ActionGroups
 	{
 		public static Gtk.ActionGroup GetActionGroup (System.Type type)
 		{
 			return Stetic.ActionGroups.GetActionGroup (type.FullName);
 		}
-        
+		
 		public static Gtk.ActionGroup GetActionGroup (string name)
 		{
 			return null;

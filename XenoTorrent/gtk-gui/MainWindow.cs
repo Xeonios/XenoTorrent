@@ -7,7 +7,7 @@ public partial class MainWindow
 	private global::Gtk.ScrolledWindow GtkScrolledWindow;
 	private global::Gtk.NodeView nodeview2;
 	private global::Gtk.Statusbar statusbar1;
-    
+	
 	protected virtual void Build ()
 	{
 		global::Stetic.Gui.Initialize (this);
@@ -47,8 +47,7 @@ public partial class MainWindow
 		w3.Expand = false;
 		w3.Fill = false;
 		this.Add (this.vbox1);
-		if ((this.Child != null))
-		{
+		if ((this.Child != null)) {
 			this.Child.ShowAll ();
 		}
 		this.DefaultWidth = 372;

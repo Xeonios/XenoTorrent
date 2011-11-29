@@ -2,23 +2,27 @@ using System;
 using System.IO;
 using Gtk;
 using MonoTorrent.Common;
+using MonoTorrent;
+using MonoTorrent.Client;
 
 namespace XenoTorrent
 {
 	public partial class TorrentSettings : Gtk.Dialog
 	{
 		Torrent torrent;
-		string dp;
+		TorrentManager t;
+		//string dp;
 		//TODO Автоматическое принятие изменений в столбце Priority при нажатии кнопки "ok" 
 		//TODO Статистика торрента
-		public TorrentSettings (Torrent t,string dp)
+		public TorrentSettings (TorrentManager t)//,string dp)
 		{
+			this.t = t;
 			this.Build ();
-			this.dp = dp;
-			torrent = t;
-			Title = t.Name;
+			//this.dp = t.SavePath;
+			torrent = t.Torrent;
+			Title = torrent.Name;
 			CellRendererText crte = new CellRendererText();
-			
+			entry1.Text = t.SavePath;
 			
 			CellRendererToggle crt = new CellRendererToggle();
 			crt.Activatable =true;
@@ -58,7 +62,7 @@ namespace XenoTorrent
 			
 			Gtk.TreeStore tfileListStore = new Gtk.TreeStore (typeof(string), typeof(bool), typeof(int), typeof(string),  typeof(string));
 
-			foreach (TorrentFile file in t.Files)
+			foreach (TorrentFile file in torrent.Files)
 			{
 				if (file.Priority != Priority.DoNotDownload)
 				{
@@ -86,7 +90,7 @@ namespace XenoTorrent
 			textview1.Buffer.Text += "Name: "+ torrent.Name+"\n\n";
 			textview1.Buffer.Text += "PublisherUrl: " + torrent.PublisherUrl + "\n\n";
 			textview1.Buffer.Text += "TorrentPath: " + torrent.TorrentPath + "\n\n";
-			textview1.Buffer.Text += "Download Path: " + dp + "\n\n";
+			textview1.Buffer.Text += "Download Path: " + t.SavePath + "\n\n";
 			textview1.Buffer.Text += "CreationDate: " + torrent.CreationDate + "\n\n";
 			textview1.Buffer.Text += "Encoding: " + torrent.Encoding + "\n\n";
 
@@ -183,6 +187,29 @@ namespace XenoTorrent
 					}
 				treeview1.Model.IterNext(ref it);
 			}
+			try
+            {
+                if (t.State != TorrentState.Stopped)
+                    t.Stop();
+            }
+            catch (Exception e)
+            {	
+           		XenoTorrent.TorrentError ts = new XenoTorrent.TorrentError (e.ToString(),"");
+            }
+
+            // Move existing files to new path
+           string newPath = entry1.Text;
+           
+           if (t.SavePath != newPath)
+           {
+				string oldPath = System.IO.Path.Combine(t.SavePath, t.Torrent.Name);
+				
+				while (t.State != TorrentState.Stopped) {};
+				
+				t.MoveFiles(newPath, true);
+				
+				t.HashCheck(false);
+           }
 			this.Destroy ();
 		}
 		

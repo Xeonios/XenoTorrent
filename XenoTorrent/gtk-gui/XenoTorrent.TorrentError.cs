@@ -8,7 +8,7 @@ namespace XenoTorrent
 		private global::Gtk.TextView textview1;
 		private global::Gtk.Button buttonCancel;
 		private global::Gtk.Button buttonOk;
-        
+		
 		protected virtual void Build ()
 		{
 			global::Stetic.Gui.Initialize (this);
@@ -65,8 +65,7 @@ namespace XenoTorrent
 			w6.Position = 1;
 			w6.Expand = false;
 			w6.Fill = false;
-			if ((this.Child != null))
-			{
+			if ((this.Child != null)) {
 				this.Child.ShowAll ();
 			}
 			this.DefaultWidth = 400;

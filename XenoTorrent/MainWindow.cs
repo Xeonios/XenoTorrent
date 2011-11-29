@@ -50,10 +50,10 @@ using System.Threading;
 	{
 		string song_title;
 	
-		public TorrentInfoRow (string Tname, string State, string Status, string Ds, string Us, string sc, Torrent torrent, int index)
+		public TorrentInfoRow (string Tname, string State, string Status, string Ds, string Us, string sc, TorrentManager tm, int index)
 		{
 			Index = index;
-			this.torrent = torrent;
+			this.TorrentManager = tm;
 			this.Tname = Tname;
 			this.State = State;
 			this.Status = Status;
@@ -62,8 +62,7 @@ using System.Threading;
 			this.song_title = song_title;
 			SeedCount = sc;
 		}
-	
-		public Torrent torrent;
+		
 		public int Index;
 	        [Gtk.TreeNodeValue (Column = 0)]
 		public string State;
@@ -76,16 +75,23 @@ using System.Threading;
 			[Gtk.TreeNodeValue (Column = 4)]
 		public int Statusprogress;
 			[Gtk.TreeNodeValue(Column = 5)]
+			
+		public TorrentManager TorrentManager;
 		public string SeedCount;
 		public string Tname;
 	
 	}
 
+class SaveTMParameters
+{
+	string TorrentPath;
+	string DownLoadPath;
+	TorrentState TS;
+}
 
 public partial class MainWindow : Gtk.Window
 {
 	//TODO Хранение параметров старых закачек на харде
-	//TODO добавить возможность работы с торрентами на распределенных хеш таблицах (DHT) (?)
 	ClientEngine engine;
 
 	Gtk.Menu jBox;
@@ -179,9 +185,9 @@ public partial class MainWindow : Gtk.Window
 
 	void HandleMenuItem7ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
-		string tpath = managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Torrent.TorrentPath;//tp + "/" +
+		string tpath = ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Torrent.TorrentPath;//tp + "/" +
 		
-		managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Dispose ();
+		((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Dispose ();
 		
 		if (File.Exists (tpath))
 		{
@@ -189,7 +195,7 @@ public partial class MainWindow : Gtk.Window
 			
 			try
 			{
-				foreach (TorrentFile tf in managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Torrent.Files)
+				foreach (TorrentFile tf in ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Torrent.Files)
 					File.Delete(tf.FullPath);
 			}catch{}
 			nodeview2.NodeStore.RemoveNode (nodeview2.NodeSelection.SelectedNode);
@@ -198,9 +204,9 @@ public partial class MainWindow : Gtk.Window
 
 	void HandleMenuItem6ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
-		string tpath = managers[((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Torrent.TorrentPath;//tp + "/" +
+		string tpath = ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Torrent.TorrentPath;//tp + "/" +
 		
-		managers[((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Dispose();
+		((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Dispose();
 		
 		if (File.Exists(tpath))
 		{
@@ -213,9 +219,9 @@ public partial class MainWindow : Gtk.Window
 	void HandleMenuItem5ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
 		if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-			System.Diagnostics.Process.Start ("C:\\WINDOWS\\explorer" ,dp);
+			System.Diagnostics.Process.Start ("C:\\WINDOWS\\explorer" , ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.SavePath);
 		else
-			System.Diagnostics.Process.Start(dp);
+			System.Diagnostics.Process.Start(((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.SavePath);
 	}
 	
 	[GLib.ConnectBeforeAttribute]  // without it, the ButtonPress event of nodeview2 doesn't invoked
@@ -225,13 +231,13 @@ public partial class MainWindow : Gtk.Window
 		{
 			if ((args.Event.Button==1))
 			{
-				XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent, dp);
+				XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager);
 				ts.Show ();
 			}
 			
 			if (args.Event.Button==3)
 			{
-				if (managers[((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].State == TorrentState.Seeding)
+				if (((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.State == TorrentState.Seeding)
 					MenuItem3.Sensitive = true;
 				else
 					MenuItem3.Sensitive = false;
@@ -243,23 +249,23 @@ public partial class MainWindow : Gtk.Window
 
 	void HandleMenuItem4ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
-		managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Pause ();
+		((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Pause ();
 	}
 	
 	void HandleMenuItem3ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
-		System.Diagnostics.Process.Start(dp+"/"+ ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).torrent.Name);
+		System.Diagnostics.Process.Start(dp+"/"+ ((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Torrent.Name);
 		
 	}
 
 	void HandleMenuItem2ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
-		managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Stop ();
+		((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Stop ();
 	}
 
 	void HandleMenuItem1ButtonReleaseEvent (object o, ButtonReleaseEventArgs args)
 	{
-		managers [((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).Index].Start ();
+		((TorrentInfoRow)nodeview2.NodeSelection.SelectedNode).TorrentManager.Start ();
 	}
 
 	void UpdateAll (object sender, StatsUpdateEventArgs e)
@@ -284,16 +290,19 @@ public partial class MainWindow : Gtk.Window
 		ts.UseDht = true;
 		TorrentManager manager = new TorrentManager (torrent, dp, ts);
 		manager.PeersFound += HandleManagerPeersFound;
+		
+		PiecePicker picker = new StandardPicker ();
+		picker = new PriorityPicker (picker);
+		manager.ChangePicker (picker);
+		
 		managers.Add (manager);
 		
 		engine.Register(manager);
 		
 		// Disable rarest first and randomised picking - only allow priority based picking (i.e. selective downloading)
-		PiecePicker picker = new StandardPicker ();
-		picker = new PriorityPicker (picker);
-		manager.ChangePicker (picker);
+
 		
-		nodeview2.NodeStore.AddNode (new TorrentInfoRow (manager.Torrent.Name, manager.State.ToString (), manager.Torrent.Name.Substring (0, 10), "0", "0", "0", torrent, managers.Count -1));
+		nodeview2.NodeStore.AddNode (new TorrentInfoRow (manager.Torrent.Name, manager.State.ToString (), manager.Torrent.Name.Substring (0, 10), "0", "0", "0", manager, managers.Count -1));
 		nodeview2.Columns[0].MinWidth=100;
 		nodeview2.Columns[1].MinWidth = 80;
 		nodeview2.Columns[2].MinWidth = 65;
@@ -306,7 +315,7 @@ public partial class MainWindow : Gtk.Window
 	{	
 		foreach (TorrentInfoRow row in nodeview2.NodeStore)
 		{
-			if (row.torrent == e.TorrentManager.Torrent)
+			if (row.TorrentManager.Torrent == e.TorrentManager.Torrent)
 				newTorrents[row.Index] = e.NewPeers;
 		}
 	}
@@ -333,8 +342,9 @@ public partial class MainWindow : Gtk.Window
 		Application.Quit ();
 		a.RetVal = true;
 	}
+	
 
-
+	
 	void updateState(object sendera, EventArgs e)
 	{
 		int i=0;
@@ -404,7 +414,8 @@ public partial class MainWindow : Gtk.Window
 			foreach (TorrentManager manager in temp) 
 				{
 					//manager.HashCheck(true);
-					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (manager.Torrent,dp);
+					manager.Stop();
+					XenoTorrent.TorrentSettings ts = new XenoTorrent.TorrentSettings (manager);
 					ts.Show ();
 				}
 
@@ -412,52 +423,52 @@ public partial class MainWindow : Gtk.Window
 		
 	}
 	
-         public void StartDht ( int port)
-         {
-             // Send/receive DHT messages on the specified port
-             IPEndPoint listenAddress = new IPEndPoint (IPAddress.Any, port);
- 	
-             // Create a listener which will process incoming/outgoing dht messages
-             listener = new MonoTorrent.Dht.Listeners.DhtListener(listenAddress);
- 
-             // Create the dht engine
-             DhtEngine de = new DhtEngine (listener);
-				de.StateChanged += HandleDeStateChanged;
-             // Connect the Dht engine to the MonoTorrent engine
-             engine.RegisterDht (de);
- 
-             // Start listening for dht messages and activate the DHT engine
-             listener.Start ();
- 
-             // If there are existing DHT nodes stored on disk, load them
-             // into the DHT engine so we can try and avoid a (very slow)
-             // full bootstrap
-             byte[] nodes = null;
-            
-             if (File.Exists (dhtpath))
-                 nodes = File.ReadAllBytes (dhtpath);
-             de.Start (nodes);
-         }
+     public void StartDht ( int port)
+     {
+         // Send/receive DHT messages on the specified port
+         IPEndPoint listenAddress = new IPEndPoint (IPAddress.Any, port);
 
-         void HandleDeStateChanged (object sender, EventArgs e)
-         {
-			if (nodeview2.NodeSelection.SelectedNode == null)
-         		statusbar1.Push(0, "DHT: " + (sender as DhtEngine).State.ToString());
-         }
- 
-         public void StopDht ()
-         {
-             // Stop the listener and dht engine. This does not
-             // clear internal data so the DHT can be started again
-             // later without needing a full bootstrap.
-             listener.Stop ();
-             File.WriteAllBytes (dhtpath, de.SaveNodes ());
-             de.Stop ();
+         // Create a listener which will process incoming/outgoing dht messages
+         listener = new MonoTorrent.Dht.Listeners.DhtListener(listenAddress);
 
-             // Save all known dht nodes to disk so they can be restored
-             // later. This is *highly* recommended as it makes startup
-             // much much faster.
-            
-         }	
+         // Create the dht engine
+         DhtEngine de = new DhtEngine (listener);
+			de.StateChanged += HandleDeStateChanged;
+         // Connect the Dht engine to the MonoTorrent engine
+         engine.RegisterDht (de);
+
+         // Start listening for dht messages and activate the DHT engine
+         listener.Start ();
+
+         // If there are existing DHT nodes stored on disk, load them
+         // into the DHT engine so we can try and avoid a (very slow)
+         // full bootstrap
+         byte[] nodes = null;
+        
+         if (File.Exists (dhtpath))
+             nodes = File.ReadAllBytes (dhtpath);
+         de.Start (nodes);
+     }
+
+     void HandleDeStateChanged (object sender, EventArgs e)
+     {
+		if (nodeview2.NodeSelection.SelectedNode == null)
+     		statusbar1.Push(0, "DHT: " + (sender as DhtEngine).State.ToString());
+     }
+
+     public void StopDht ()
+     {
+         // Stop the listener and dht engine. This does not
+         // clear internal data so the DHT can be started again
+         // later without needing a full bootstrap.
+         listener.Stop ();
+         File.WriteAllBytes (dhtpath, de.SaveNodes ());
+         de.Stop ();
+
+         // Save all known dht nodes to disk so they can be restored
+         // later. This is *highly* recommended as it makes startup
+         // much much faster.
+        
+     }	
 }
 

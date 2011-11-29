@@ -1,10 +1,10 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="XenoTorrent/Main.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="XenoTorrent/MainWindow.cs">
     <Files>
-      <File FileName="XenoTorrent/Main.cs" Line="19" Column="4" />
-      <File FileName="XenoTorrent/MainWindow.cs" Line="1" Column="1" />
-      <File FileName="XenoTorrent/TorrentSettings.cs" Line="1" Column="1" />
+      <File FileName="XenoTorrent/Main.cs" Line="150" Column="19" />
+      <File FileName="XenoTorrent/MainWindow.cs" Line="372" Column="3" />
+      <File FileName="XenoTorrent/TorrentSettings.cs" Line="190" Column="29" />
       <File FileName="XenoTorrent/TorrentError.cs" Line="1" Column="1" />
     </Files>
     <Pads>
@@ -14,7 +14,7 @@
           <Option id="ShowAllFiles" value="False" />
           <Node name="XenoTorrent" expanded="True">
             <Option id="ShowAllFiles" value="True" />
-            <Node name="Main.cs" selected="True" />
+            <Node name="MainWindow.cs" selected="True" />
           </Node>
         </State>
       </Pad>

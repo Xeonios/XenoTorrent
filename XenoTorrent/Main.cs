@@ -2,7 +2,8 @@ using System;
 using Gtk;
 using Gdk;
 using System.IO;
-using System.Threading;
+using System.Runtime;
+using System.Diagnostics;
 
 namespace XenoTorrent
 {
@@ -13,13 +14,42 @@ namespace XenoTorrent
 		
 		private static StatusIcon trayIcon;
 		
+		private static bool IsApplicationRunningOnMono (string processName)
+		{ 
+			var processFound = 0; 
+			
+			Process[] monoProcesses; 
+			ProcessModuleCollection processModuleCollection; 
+
+			//find all processes called 'mono', that's necessary because our app runs under the mono process! 
+			monoProcesses = Process.GetProcessesByName ("mono"); 
+
+			for (var i = 0; i <= monoProcesses.GetUpperBound(0); ++i)
+			{ 
+				processModuleCollection = monoProcesses [i].Modules; 
+
+				for (var j = 0; j < processModuleCollection.Count; ++j)
+				{ 
+					if (processModuleCollection [j].FileName.EndsWith (processName))
+					{ 
+						processFound++; 
+					} 
+				} 
+			} 
+
+			//we don't find the current process, but if there is already another one running, return true! 
+			return (processFound == 1); 
+		}
+		
 		public static void Main (string[] args)
 		{
-			bool onlyInstance;
+			//bool onlyInstance;
+			//Push changes
+			//bool onlyInstance;
 			//Push changes test
-			Mutex mtx = new Mutex (true, "XenoTorrent.exe", out onlyInstance); // используйте имя вашего приложения
+			//Mutex mtx = new Mutex (true, "XenoTorrent.exe", out onlyInstance); // используйте имя вашего приложения
 			
-			if (onlyInstance)
+			if (!IsApplicationRunningOnMono ("XenoTorrent.exe"))
 			{
 				ep = Path.GetDirectoryName (System.Reflection.Assembly.GetExecutingAssembly ().Location);
 	
@@ -43,7 +73,7 @@ namespace XenoTorrent
 					}
 					catch{}
 				}
-	
+
 				Application.Init ();
 				
 					if (File.Exists(ep+"/1.png"))
@@ -57,7 +87,7 @@ namespace XenoTorrent
 					trayIcon.PopupMenu += OnTrayIconPopup;
 					// A Tooltip for the Icon
 					trayIcon.Tooltip = "XenoTorrent";
-					
+
 					MainWindow win = new MainWindow (tp,dp,ep, trayIcon);
 					
 					// Show/Hide the window (even from the Panel/Taskbar) when the TrayIcon has been clicked.

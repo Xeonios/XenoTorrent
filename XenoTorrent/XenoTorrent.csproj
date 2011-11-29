@@ -9,7 +9,6 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>XenoTorrent</RootNamespace>
     <AssemblyName>XenoTorrent</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <ReleaseVersion>0.2</ReleaseVersion>
     <ApplicationIcon>bin\Debug\1.ico</ApplicationIcon>
   </PropertyGroup>
@@ -35,10 +34,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="MonoTorrent, Version=0.80.0.0, Culture=neutral, PublicKeyToken=null">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\MonoTorrent.dll</HintPath>
-    </Reference>
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <Package>gtk-sharp-2.0</Package>
     </Reference>
@@ -55,8 +50,10 @@
       <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="Mono.Posix" />
-    <Reference Include="MonoTorrent.Dht, Version=0.70.0.0, Culture=neutral, PublicKeyToken=null">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="MonoTorrent">
+      <HintPath>lib\MonoTorrent.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoTorrent.Dht">
       <HintPath>lib\MonoTorrent.Dht.dll</HintPath>
     </Reference>
   </ItemGroup>
